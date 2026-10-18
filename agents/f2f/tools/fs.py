@@ -69,9 +69,10 @@ def event(case_id: str, agent: str, message: str, pct: int | None = None, status
     )
 
 
-def add_message(case_id: str, role: str, text: str, cites: list[str] | None = None, uid: str | None = None) -> None:
+def add_message(case_id: str, role: str, text: str, cites: list[str] | None = None, uid: str | None = None,
+                via: str | None = None) -> None:
     case_ref(case_id).collection("messages").add(
-        {"role": role, "text": text, "cites": cites or [], "uid": uid, "at": now()}
+        {"role": role, "text": text, "cites": cites or [], "uid": uid, "via": via, "at": now()}
     )
 
 

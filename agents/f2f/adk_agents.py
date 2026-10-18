@@ -18,6 +18,7 @@ from typing import Any, AsyncGenerator, Callable
 
 from google.genai import types
 
+from . import gemini
 from .config import settings
 
 log = logging.getLogger(__name__)
@@ -129,24 +130,57 @@ def run_investigation(case_id: str) -> None:
 
 # ---------------------------------------------------------------- ask
 
-def ask(system: str, tools: list[Callable[..., Any]], history: list[dict], question: str) -> str:
-    """Answer one question with an ADK LlmAgent that calls the case tools itself."""
-    from google.adk.agents import LlmAgent
+def ask_agent(system: str, tools: list[Callable[..., Any]] | None = None):
+    from f2f_engine.agent import build
 
-    agent = LlmAgent(
-        name="ask",
-        model=settings.model_fast,
-        description="Answers questions about one warranty case using case-scoped tools.",
-        instruction=system,
-        tools=tools,
-        generate_content_config=types.GenerateContentConfig(temperature=0.2),
-    )
-    convo = "\n".join(f"{'Engineer' if m['role'] == 'user' else 'Assistant'}: {m['text']}" for m in history)
-    message = (f"Conversation so far:\n{convo}\n\nNew question: {question}" if convo else question)
+    return build(settings.model_fast, tools)
+
+
+def ask(system: str, tools: list[Callable[..., Any]], message: str) -> str:
+    """Answer one question with the in-process ADK LlmAgent (same agent as on Agent Engine, plus a claims tool)."""
     final = ""
-    for e in _run(agent, message):
+    for e in _run(ask_agent(system, tools), message):
         if e.content and e.content.parts and e.author == "ask":
             text = "".join(p.text or "" for p in e.content.parts if getattr(p, "text", None))
             if text.strip():
                 final = text
     return final.strip()
+
+
+# ---------------------------------------------------------------- Vertex AI Agent Engine
+
+_remote = None
+_remote_lock = __import__("threading").Lock()
+
+
+def remote_agent():
+    """The deployed Ask agent on Vertex AI Agent Engine (looked up once, then reused)."""
+    global _remote
+    with _remote_lock:
+        if _remote is None:
+            import vertexai
+            from vertexai import agent_engines
+
+            region = settings.agent_engine.split("/locations/")[1].split("/")[0]
+            vertexai.init(project=settings.project, location=region)
+            _remote = agent_engines.get(settings.agent_engine)
+        return _remote
+
+
+def ask_remote(message: str) -> str:
+    """Ask the agent on Agent Engine; give up after AGENT_ENGINE_TIMEOUT seconds so Ask never hangs."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    def go() -> str:
+        final = ""
+        for e in remote_agent().stream_query(user_id="f2f", message=message):
+            for p in (e.get("content") or {}).get("parts", []):
+                if p.get("text"):
+                    final = p["text"]
+        return final.strip()
+
+    pool = ThreadPoolExecutor(max_workers=1)
+    try:
+        return pool.submit(go).result(timeout=settings.agent_engine_timeout)
+    finally:
+        pool.shutdown(wait=False)

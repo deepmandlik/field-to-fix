@@ -45,6 +45,12 @@ def warm_link_cache() -> None:
                     LEFT JOIN {settings.table('dealers')} d USING (dealer_id)""")})
         except Exception:
             pass
+        if settings.agent_engine:  # connect to the Ask agent on Vertex AI Agent Engine ahead of the first question
+            try:
+                from f2f import adk_agents
+                adk_agents.remote_agent()
+            except Exception:
+                pass
 
     threading.Thread(target=warm, daemon=True).start()
 

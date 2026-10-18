@@ -9,7 +9,7 @@ echo "== f2f-agents"
 gcloud run deploy f2f-agents --quiet --source agents --region $R --project $P \
   --service-account $SA --memory 2Gi --cpu 2 --timeout 900 --min-instances 1 --no-cpu-throttling \
   --allow-unauthenticated \
-  --set-env-vars "GOOGLE_CLOUD_PROJECT=$P,GOOGLE_CLOUD_LOCATION=global,EMBED_LOCATION=us-central1,BQ_DATASET=f2f,BQ_LOCATION=$R,GCS_BUCKET=$P-f2f,PUBSUB_TOPIC=claims-new,AS_OF_DATE=2026-10-17,ALLOWED_ORIGINS=http://localhost:3000"
+  --set-env-vars "GOOGLE_CLOUD_PROJECT=$P,GOOGLE_CLOUD_LOCATION=global,EMBED_LOCATION=us-central1,BQ_DATASET=f2f,BQ_LOCATION=$R,GCS_BUCKET=$P-f2f,PUBSUB_TOPIC=claims-new,AS_OF_DATE=2026-10-17,AGENT_ENGINE=projects/919041831876/locations/us-central1/reasoningEngines/5068630131669467136,ALLOWED_ORIGINS=http://localhost:3000"
 API_URL=$(gcloud run services describe f2f-agents --region $R --project $P --format='value(status.url)')
 echo "API: $API_URL"
 
