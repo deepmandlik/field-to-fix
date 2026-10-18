@@ -1,0 +1,20 @@
+# secrets and local config
+.env
+.env.*
+!.env.example
+!.env.local.example
+# dependencies and builds
+.venv/
+__pycache__/
+node_modules/
+.next/
+*.tsbuildinfo
+# generated data and media (regenerate with scripts/)
+data/seed/
+video/**/*.mp4
+video/**/*.wav
+video/remotion/public/
+video/remotion/out/
+submission/*.pptx
+submission/*.pdf
+.DS_Store
