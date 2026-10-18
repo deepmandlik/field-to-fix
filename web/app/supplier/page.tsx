@@ -1,17 +1,40 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StatusChip } from "@/components/chips";
 import { BarList, Stat } from "@/components/charts";
 import { IArrow, ICheck } from "@/components/icons";
 import { api } from "@/lib/api";
 import { pct, useCases } from "@/lib/data";
+import { useSession } from "@/lib/session";
 
-const ORG = "S-KAV";
+const DEFAULT_ORG = "S-KAV";
+const CONTACT: Record<string, string> = { "S-KAV": "Suresh Iyer" };
 
 export default function SupplierPortal() {
   const cases = useCases();
+  const { isDemo } = useSession();
+  // Suppliers that have (or will have) an 8D from this OEM. The judge account can act for any of them;
+  // a real supplier login only ever receives its own cases (Firestore rules), so it sees just its company.
+  const orgs = useMemo(() => {
+    const m = new Map<string, string>();
+    (cases ?? []).forEach((c) => c.supplier_id && m.set(c.supplier_id, c.supplier_name ?? c.supplier_id));
+    return Array.from(m.entries()).map(([id, name]) => ({ id, name }));
+  }, [cases]);
+  const [ORG, setOrg] = useState<string>(DEFAULT_ORG);
+  useEffect(() => {
+    if (!cases) return;
+    let saved: string | null = null;
+    try { saved = localStorage.getItem("f2f.actingOrg"); } catch {}
+    const open = (o: string | null) => !!o && cases.some((c) => c.supplier_id === o && c.status === "sent_to_supplier");
+    const newest = cases.find((c) => c.status === "sent_to_supplier")?.supplier_id;  // cases arrive newest-updated first
+    const pick = !isDemo ? (cases.find((c) => c.supplier_id)?.supplier_id ?? DEFAULT_ORG) : open(saved) ? saved! : newest ?? saved ?? DEFAULT_ORG;
+    setOrg(pick);
+    try { localStorage.setItem("f2f.actingOrg", pick); } catch {}
+  }, [cases?.length, cases?.map((c) => c.status).join(), isDemo]);
+  const choose = (o: string) => { setOrg(o); try { localStorage.setItem("f2f.actingOrg", o); } catch {} };
+  const orgName = orgs.find((o) => o.id === ORG)?.name ?? "Kaveri Hoses Pvt Ltd";
   const mine = (cases ?? []).filter((c) => c.supplier_id === ORG && ["sent_to_supplier", "supplier_responded", "closed"].includes(c.status));
   const waiting = (cases ?? []).filter((c) => c.supplier_id === ORG && ["detected", "investigating", "sqe_review"].includes(c.status));
   const [open, setOpen] = useState<string | null>(null);
@@ -24,10 +47,22 @@ export default function SupplierPortal() {
   return (
     <>
       <div className="page-head"><div className="grow">
-        <span className="label">Step 4 · Suresh Iyer · Kaveri Hoses Pvt Ltd (Tier-1)</span>
+        <span className="label">Step 4 · {CONTACT[ORG] ?? "Quality manager"} · {orgName} (Tier-1)</span>
         <h1>8D requests from your customer</h1>
         <p>You see only cases that involve your parts. Each comes with the OEM's evidence: field claims, the batches involved, stock to contain and the AI's root-cause hypotheses.</p>
-      </div></div>
+      </div>
+        {isDemo && orgs.length > 1 && (
+          <label className="row small" style={{ gap: 8 }}>
+            <span className="faint">Acting for</span>
+            <select className="select" style={{ width: "auto", height: 36 }} value={ORG} onChange={(e) => choose(e.target.value)} aria-label="Supplier company">
+              {orgs.map((o) => {
+                const n = (cases ?? []).filter((c) => c.supplier_id === o.id && c.status === "sent_to_supplier").length;
+                return <option key={o.id} value={o.id}>{o.name}{n ? ` · ${n} open 8D` : ""}</option>;
+              })}
+            </select>
+          </label>
+        )}
+      </div>
 
       <div className="grid g4 eq">
         <Stat label="Open 8D requests" value={mine.filter((c) => c.status === "sent_to_supplier").length} sub={`${mine.length} total`} hot={mine.some((c) => c.status === "sent_to_supplier")} />

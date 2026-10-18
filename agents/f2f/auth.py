@@ -1,6 +1,7 @@
 """Firebase ID-token auth with role claims. Roles: dealer, analyst, sqe, supplier, exec, system."""
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 import firebase_admin
@@ -30,7 +31,8 @@ DEMO_SUPPLIER_ORG = "S-KAV"
 def current_user(authorization: str | None = Header(default=None),
                  x_dev_role: str | None = Header(default=None),
                  x_dev_uid: str | None = Header(default=None),
-                 x_act_as: str | None = Header(default=None)) -> User:
+                 x_act_as: str | None = Header(default=None),
+                 x_act_org: str | None = Header(default=None)) -> User:
     if settings.dev_auth and x_dev_role:
         return User(uid=x_dev_uid or f"dev-{x_dev_role}", role=x_dev_role, org_id="S-KAV" if x_dev_role == "supplier" else None)
     if not authorization or not authorization.startswith("Bearer "):
@@ -41,7 +43,9 @@ def current_user(authorization: str | None = Header(default=None),
         role = claims.get("role", "analyst")
         if role == "demo":  # judges' demo account: one login, can act as any role from the UI switcher
             role = x_act_as if x_act_as in ACTABLE else "analyst"
-            return User(uid=claims["uid"], role=role, org_id=DEMO_SUPPLIER_ORG if role == "supplier" else None, is_demo=True)
+            # The judge can act for any supplier, so an 8D sent to any Tier-1 reaches its inbox.
+            org = x_act_org if x_act_org and re.fullmatch(r"S-[A-Z]{2,8}", x_act_org) else DEMO_SUPPLIER_ORG
+            return User(uid=claims["uid"], role=role, org_id=org if role == "supplier" else None, is_demo=True)
         return User(uid=claims["uid"], role=role, org_id=claims.get("org_id"))
     except Exception:
         pass

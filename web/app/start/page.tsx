@@ -13,7 +13,7 @@ const AGENTS = [
   { n: "Signal", m: "Gemini embeddings + HDBSCAN", d: "Groups claims by meaning and flags clusters growing faster than their baseline." },
   { n: "Trace", m: "BigQuery tools", d: "Joins failing VINs to plant, part, supplier and batch; computes each batch's lift over the fleet." },
   { n: "Hypothesise", m: "Gemini 4 Argon", d: "Checks the cluster against the PFMEA and control plan; ranks root causes with citations." },
-  { n: "Draft 8D", m: "Gemini 4 Argon", d: "Writes D2–D5 with containment quantities from the stock table. A person approves." },
+  { n: "Draft 8D", m: "Gemini 3.8 Flash", d: "Writes D2–D5 with containment quantities from the stock table. A person approves." },
 ];
 
 export default function Start() {

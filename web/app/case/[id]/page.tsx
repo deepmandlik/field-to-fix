@@ -344,7 +344,8 @@ function Ask({ id, messages, onCite }: { id: string; messages: any[]; onCite: (x
       <div className="row"><ISpark /><h3 className="grow">Ask about this case</h3></div>
       <p className="faint small">Gemini answers from this case's data only, using tools, and cites claims and PFMEA rows.</p>
       <div className="stack" style={{ maxHeight: 420, overflowY: "auto", gap: 8 }}>
-        {messages.map((m, i) => <div key={i} className={`msg ${m.role}`}>{render(m.text)}</div>)}
+        {messages.map((m, i) => <div key={i} className={`msg ${m.role}`}>{render(m.text)}
+          {m.role === "assistant" && m.via && <div className="faint" style={{ fontSize: 11, marginTop: 6 }}>via {m.via}</div>}</div>)}
         {busy && <div className="msg assistant"><span className="spin" /> Thinking…</div>}
         <div ref={end} />
       </div>

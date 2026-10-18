@@ -12,6 +12,7 @@ export async function api<T = any>(path: string, init: RequestInit & { json?: un
   if (token) headers.Authorization = `Bearer ${token}`;
   const act = actingRole();
   if (act) headers["X-Act-As"] = act;
+  try { const org = localStorage.getItem("f2f.actingOrg"); if (org) headers["X-Act-Org"] = org; } catch {}
   if (init.json !== undefined) {
     headers["Content-Type"] = "application/json";
     init.body = JSON.stringify(init.json);
