@@ -226,3 +226,93 @@ mob = ('<div style="display:flex;gap:44px;justify-content:center;align-items:fle
        f'<div style="display:flex;flex-direction:column;align-items:center">{watch("w3-wear-sqe-case.png", 320, True)}{cap("Wear OS · round", "Same flow, any watch")}</div>'
        '</div>')
 render("wire-mobile", mob, W, H)
+
+
+# ---------------- architecture on Google Cloud (flat, GCP-console style) ----------------
+def gcp_arch():
+    W, H = 1866, 780
+    KIND = {"compute": BLUE, "data": GREEN, "ai": PURPLE, "msg": ORANGE, "auth": YELLOW, "user": GREY}
+
+    def node(x, y, w, h, kind, title, sub="", extra=""):
+        c = KIND[kind]
+        return (f'<div class="n" style="left:{x}px;top:{y}px;width:{w}px;height:{h}px;border-color:{mix(c, "#FFFFFF", 0.45)}">'
+                f'<div class="ic" style="background:{c}"></div><div class="t">{title}</div><div class="s">{sub}</div>{extra}</div>')
+
+    def tile(name, sub):
+        return f'<div class="tile"><b>{name}</b><span>{sub}</span></div>'
+
+    agents = "".join(tile(n, s) for n, s in (("1 · Intake", "3.8 Flash · any language"), ("2 · Signal", "embeddings · clusters"),
+                                              ("3 · Trace", "BigQuery · batch + lift"), ("4 · Hypothesise", "4 Argon · vs PFMEA"),
+                                              ("5 · Draft 8D", "3.8 Flash · cited"), ("Ask", "on Agent Engine")))
+    users = ('<div class="users"><div class="ut">People</div>'
+             + "".join(f'<div class="u">{u}</div>' for u in ("Dealer", "Warranty analyst", "Supplier quality", "Tier-1 supplier", "Head of quality"))
+             + '<div class="us">web · phone · watch</div></div>')
+    legend = ('<div class="legend">' + "".join(f'<span><i style="background:{KIND[k]}"></i>{t}</span>' for k, t in
+              (("compute", "Compute"), ("auth", "Identity"), ("data", "Data"), ("ai", "AI"), ("msg", "Events"))) + "</div>")
+    body = (
+        f'<div class="frame"></div><div class="gct"><span class="gl">Google Cloud</span> · asia-southeast1</div>'
+        + users + legend
+        + node(300, 92, 300, 108, "auth", "Firebase Auth", "5 roles via custom claims + judge")
+        + node(300, 300, 300, 170, "compute", "Next.js web app", "Cloud Run · f2f-web<br>dashboards · phone · watch views")
+        + node(700, 92, 620, 398, "compute", "FastAPI agent API", "Cloud Run · f2f-agents · orchestrated by Google ADK",
+               f'<div class="grid3">{agents}</div><div class="seq">ADK SequentialAgent: Trace → Hypothesise → Draft 8D</div>')
+        + node(1420, 92, 400, 118, "data", "Cloud Firestore", "cases · agent log · approvals · 8D · chat")
+        + node(1420, 252, 400, 108, "data", "Cloud Storage", "claim photos · voice notes")
+        + node(1420, 402, 400, 108, "data", "BigQuery", "claims · vehicles · batches · stock · PFMEA")
+        + node(300, 572, 300, 150, "msg", "Pub/Sub + Scheduler", "async claim intake · hourly signal scan")
+        + node(700, 572, 300, 150, "ai", "Vertex AI · Gemini", "3.8 Flash · 4 Argon<br>gemini-embedding-001")
+        + node(1020, 572, 300, 150, "ai", "Vertex AI Agent Engine", "Ask agent (Google ADK)<br>1 warm instance")
+        + node(1420, 572, 400, 150, "user", "No API keys", "one service account (f2f-run) calls Vertex AI, BigQuery, Firestore and Storage")
+    )
+
+    def ln(d, color=INK, dash=False, both=False, label="", lx=0, ly=0, anchor="middle"):
+        m = 'marker-end="url(#a)"' + (' marker-start="url(#as)"' if both else "")
+        out = f'<path d="{d}" fill="none" stroke="{color}" stroke-width="3" {"stroke-dasharray=&quot;9 7&quot;" if dash else ""} {m}/>'
+        if label:
+            out += f'<text x="{lx}" y="{ly}" text-anchor="{anchor}" font-size="18" fill="{MUTED}">{label}</text>'
+        return out
+
+    G = mix(GREEN, "#000000", 0.1)
+    arrows = (
+        '<defs><marker id="a" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" refX="12" refY="8" orient="auto">'
+        f'<path d="M0,0 L16,8 L0,16 z" fill="context-stroke"/></marker>'
+        '<marker id="as" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" refX="4" refY="8" orient="auto-start-reverse">'
+        '<path d="M0,0 L16,8 L0,16 z" fill="context-stroke"/></marker></defs>'
+        + ln("M232,386 L296,386", label="HTTPS", lx=264, ly=374)
+        + ln("M450,298 L450,204", both=True, label="sign in · ID token", lx=462, ly=258, anchor="start")
+        + ln("M602,400 L696,400", label="REST +", lx=649, ly=430) + f'<text x="649" y="452" text-anchor="middle" font-size="18" fill="{MUTED}">ID token</text>'
+        + ln("M1322,150 L1416,150", both=True, label="writes", lx=1369, ly=138)
+        + ln("M1322,306 L1416,306", both=True, label="files", lx=1369, ly=294)
+        + ln("M1322,456 L1416,456", both=True, label="SQL tools", lx=1369, ly=444)
+        + ln("M850,492 L850,568", label="structured calls", lx=862, ly=536, anchor="start")
+        + ln("M1170,492 L1170,568", label="Ask", lx=1182, ly=536, anchor="start")
+        + ln("M602,640 L660,640 L660,470 L696,470", color=ORANGE, label="push · cron", lx=668, ly=560, anchor="start")
+        + ln("M1620,90 L1620,58 L650,58 L650,330 L606,330", color=G, dash=True)
+        + f'<text x="1135" y="48" text-anchor="middle" font-size="18" font-weight="700" fill="{G}">Firestore realtime listeners: every screen updates live</text>'
+    )
+    css = f"""
+    .frame{{position:absolute;left:262px;top:14px;width:1590px;height:752px;border:2px solid #DADCE0;border-radius:18px;background:#F8FAFD}}
+    .fh{{position:absolute;left:0;top:0;right:0;height:0;padding:0}}
+    .fh{{display:none}}
+    .n{{position:absolute;background:#fff;border:2px solid;border-radius:14px;padding:16px 18px;box-sizing:border-box;box-shadow:0 2px 6px rgba(32,33,36,.08)}}
+    .ic{{position:absolute;right:16px;top:16px;width:26px;height:26px;border-radius:7px}}
+    .t{{font-size:25px;font-weight:700;color:{INK};padding-right:34px}}
+    .s{{font-size:18px;color:{MUTED};margin-top:6px;line-height:1.3}}
+    .grid3{{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}}
+    .tile{{background:{mix(BLUE, "#FFFFFF", 0.9)};border:1.5px solid {mix(BLUE, "#FFFFFF", 0.6)};border-radius:10px;padding:12px 12px;display:flex;flex-direction:column;gap:4px}}
+    .tile b{{font-size:20px;color:{mix(BLUE, "#000000", 0.45)}}} .tile span{{font-size:16px;color:{MUTED}}}
+    .seq{{margin-top:14px;font-size:17px;color:{mix(BLUE, "#000000", 0.35)};font-weight:600}}
+    .users{{position:absolute;left:10px;top:240px;width:222px;background:#fff;border:2px solid #DADCE0;border-radius:14px;padding:14px;box-sizing:border-box}}
+    .ut{{font-size:24px;font-weight:700;color:{INK};margin-bottom:8px}} .u{{font-size:17px;color:{INK};padding:5px 0;border-bottom:1px solid #F1F3F4}}
+    .us{{font-size:16px;color:{MUTED};margin-top:8px}}
+    .legend{{position:absolute;left:10px;top:600px;width:222px;display:flex;flex-direction:column;gap:8px;font-size:17px;color:{MUTED}}}
+    .legend i{{display:inline-block;width:16px;height:16px;border-radius:4px;margin-right:8px;vertical-align:-2px}}
+    .gct{{position:absolute;left:300px;top:34px;font-size:22px;color:{MUTED}}} .gl{{font-weight:700;color:{INK}}}
+    svg.ov{{position:absolute;left:0;top:0}}
+    """
+    html = (f'<style>{css}</style><div style="position:relative;width:{W}px;height:{H}px">{body}'
+            f'<svg class="ov" width="{W}" height="{H}" viewBox="0 0 {W} {H}" font-family="{FONT}">{arrows}</svg></div>')
+    render("arch-gcp", html, W, H)
+
+
+gcp_arch()

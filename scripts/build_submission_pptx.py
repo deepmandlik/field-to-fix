@@ -316,8 +316,8 @@ image(s2, "wire-mobile.png", 0.5, 1.42, w=9.0, border=False)
 footer(s2, 7)
 
 # ---------- 8. Architecture ----------
-s = S[7]; set_title(s, "Architecture diagram of the proposed solution", "Four layers on Google Cloud · two Cloud Run services · region asia-southeast1 · no API keys, one service account")
-image(s, "arch3d.png", 0.45, 1.42, w=9.1, border=False)
+s = S[7]; set_title(s, "Architecture diagram of the proposed solution", "Two Cloud Run services, Firebase, Firestore, BigQuery and Gemini on Vertex AI · agents orchestrated by Google ADK")
+image(s, "arch-gcp.png", 0.33, 1.4, w=9.33, h=3.78, border=False)
 footer(s, 8)
 
 # ---------- 9. Technologies ----------

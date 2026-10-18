@@ -39,6 +39,12 @@ Results with Gemini 3.8 Flash: 99/100 (default thinking) and 100/100 (low thinki
 
 ## Architecture
 
+![Field-to-Fix system architecture on Google Cloud](docs/architecture.png)
+
+In detail, as deployed (Google ADK orchestration, Gemini 3.8 Flash and 4 Argon, Ask on Vertex AI Agent Engine):
+
+![Field-to-Fix services and data flows](docs/architecture-detailed.png)
+
 ```
 Dealer / Analyst / SQE / Supplier / Exec
         │  Firebase Auth (role claims)
@@ -46,13 +52,13 @@ Dealer / Analyst / SQE / Supplier / Exec
 Cloud Run: f2f-web (Next.js) ──realtime──▶ Firestore (cases, events, 8D, chat)
         │ REST + ID token                      ▲
         ▼                                      │
-Cloud Run: f2f-agents (FastAPI)  ──────────────┘
-   ├─ 1 Intake      Gemini Flash: multilingual note + photo + voice → structured claim + embedding
+Cloud Run: f2f-agents (FastAPI, orchestrated by Google ADK) ──┘
+   ├─ 1 Intake      Gemini 3.8 Flash: multilingual note + photo + voice → structured claim + embedding
    ├─ 2 Signal      HDBSCAN on gemini-embedding-001 vectors, growth vs baseline, Gemini names clusters
    ├─ 3 Trace       BigQuery: VIN → plant → part → supplier → batch, lift vs fleet share, stock
-   ├─ 4 Hypothesise Gemini Pro + PFMEA/control-plan retrieval, cited root causes
-   ├─ 5 Draft 8D    Gemini Pro, D2–D5 with citations validated against inputs
-   └─ Ask          Gemini with function calling, scoped to one case
+   ├─ 4 Hypothesise Gemini 4 Argon + PFMEA/control-plan retrieval, cited root causes
+   ├─ 5 Draft 8D    Gemini 3.8 Flash, D2–D5 with citations validated against inputs
+   └─ Ask          ADK agent on Vertex AI Agent Engine, scoped to one case
         │
         ├─ BigQuery  (claims, vehicles, vin_parts, batches, stock, pfmea_rows, control_plan_rows)
         ├─ Cloud Storage (photos, voice notes)
