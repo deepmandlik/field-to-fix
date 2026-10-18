@@ -6,10 +6,13 @@ R=asia-southeast1
 SA=f2f-run@$P.iam.gserviceaccount.com
 
 echo "== f2f-agents"
+# Keep the live web app allowed during the redeploy; otherwise the site gets "Failed to fetch" until the end.
+WEB_EXISTING=$(gcloud run services describe f2f-web --region $R --project $P --format='value(status.url)' 2>/dev/null || true)
+ORIGINS="http://localhost:3000${WEB_EXISTING:+,$WEB_EXISTING}"
 gcloud run deploy f2f-agents --quiet --source agents --region $R --project $P \
   --service-account $SA --memory 2Gi --cpu 2 --timeout 900 --min-instances 1 --no-cpu-throttling \
   --allow-unauthenticated \
-  --set-env-vars "GOOGLE_CLOUD_PROJECT=$P,GOOGLE_CLOUD_LOCATION=global,EMBED_LOCATION=us-central1,BQ_DATASET=f2f,BQ_LOCATION=$R,GCS_BUCKET=$P-f2f,PUBSUB_TOPIC=claims-new,AS_OF_DATE=2026-10-17,AGENT_ENGINE=projects/919041831876/locations/us-central1/reasoningEngines/5068630131669467136,ALLOWED_ORIGINS=http://localhost:3000"
+  --set-env-vars "^@^GOOGLE_CLOUD_PROJECT=$P@GOOGLE_CLOUD_LOCATION=global@EMBED_LOCATION=us-central1@BQ_DATASET=f2f@BQ_LOCATION=$R@GCS_BUCKET=$P-f2f@PUBSUB_TOPIC=claims-new@AS_OF_DATE=2026-10-17@AGENT_ENGINE=projects/919041831876/locations/us-central1/reasoningEngines/5068630131669467136@ALLOWED_ORIGINS=$ORIGINS"
 API_URL=$(gcloud run services describe f2f-agents --region $R --project $P --format='value(status.url)')
 echo "API: $API_URL"
 
