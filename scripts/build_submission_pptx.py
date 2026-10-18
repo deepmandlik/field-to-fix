@@ -349,31 +349,42 @@ for i, (g, col, items) in enumerate(groups):
 footer(s, 9)
 
 # ---------- 10. Estimated cost ----------
-s = S[9]; set_title(s, "Estimated implementation cost", "Pilot scale: one OEM, 10,000 claims and ~50 investigations a month · approx. Google Cloud list prices (USD)")
-items = [("Cloud Run · agent API", "1 always-warm instance, 2 vCPU / 2 GiB", 100), ("Gemini 2.5 Flash", "10k claims × ~1.5k in / 300 out tokens", 12),
-         ("BigQuery, Firestore, Storage, Pub/Sub", "small data volumes", 10), ("Cloud Run · web app", "scales to zero", 5),
-         ("Gemini 2.5 Pro", "50 investigations × ~30k in / 3k out", 4), ("Embeddings", "10k claims + searches", 1)]
+s = S[9]; set_title(s, "Estimated implementation cost", "Pilot: one OEM, 10,000 claims and ~50 investigations a month · Singapore region · approx. Google Cloud list prices (USD)")
+items = [("Cloud Run · agent API", "1 always-on instance, 2 vCPU / 2 GiB", 140),
+         ("Gemini 2.5 Flash", "10k claims, ~1.5k in / ~1k out incl. thinking", 30),
+         ("BigQuery, Firestore, Storage, Pub/Sub", "small volumes, mostly free tier", 10),
+         ("Gemini 2.5 Pro", "50 investigations, ~30k in / ~10k out", 7),
+         ("Cloud Run · web app", "scales to zero", 5),
+         ("Build, registry, logging", "Cloud Build, Artifact Registry, Logging", 5),
+         ("Embeddings", "10k claims + searches", 1)]
 box(s, 0.33, 1.45, 6.25, 3.67, fill="FFFFFF")
-text(s, 0.5, 1.53, 4, 0.28, [("Monthly cost by service", {"bold": True})], size=11)
+text(s, 0.5, 1.52, 4, 0.28, [("Monthly cost by service", {"bold": True})], size=11)
 track_x, track_w = 3.15, 2.75
 for i, (name, note, v) in enumerate(items):
-    y = 1.9 + i * 0.5
+    y = 1.85 + i * 0.46
     text(s, 0.5, y, 2.6, 0.24, [(name, {"bold": True})], size=9.5)
-    text(s, 0.5, y + 0.21, 2.6, 0.22, [note], size=7.5, color=FAINT)
-    trk = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(track_x), Inches(y + 0.1), Inches(track_w), Inches(0.2))
+    text(s, 0.5, y + 0.2, 2.6, 0.22, [note], size=7.5, color=FAINT)
+    trk = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(track_x), Inches(y + 0.1), Inches(track_w), Inches(0.18))
     trk.adjustments[0] = 0.5; trk.fill.solid(); trk.fill.fore_color.rgb = rgb("F1F3F4"); trk.line.fill.background(); trk.shadow.inherit = False
-    bw = max(0.06, track_w * v / 100)
-    bar = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(track_x), Inches(y + 0.1), Inches(bw), Inches(0.2))
+    bw = max(0.06, track_w * v / 140)
+    bar = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(track_x), Inches(y + 0.1), Inches(bw), Inches(0.18))
     bar.adjustments[0] = 0.5; bar.fill.solid(); bar.fill.fore_color.rgb = rgb(BLUE); bar.line.fill.background(); bar.shadow.inherit = False
-    text(s, track_x + track_w + 0.08, y + 0.06, 0.55, 0.28, [(f"${v}", {"bold": True})], size=10, align=PP_ALIGN.RIGHT)
+    text(s, track_x + track_w + 0.08, y + 0.05, 0.55, 0.28, [(f"${v}", {"bold": True})], size=10, align=PP_ALIGN.RIGHT)
     if i < len(items) - 1:
-        ln = s.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(0.5), Inches(y + 0.47), Inches(6.45), Inches(y + 0.47))
+        ln = s.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(0.5), Inches(y + 0.44), Inches(6.45), Inches(y + 0.44))
         ln.line.color.rgb = rgb("F1F3F4"); ln.line.width = Pt(0.75)
-for i, (big, small) in enumerate((("≈ $130", "per month for the whole pilot"), ("≈ 1.3¢", "per warranty claim handled"), ("≈ $0.08", "of Gemini per investigation"))):
-    y = 1.45 + i * 1.255
-    box(s, 6.75, y, 2.91, 1.16, fill="FFFFFF", accent=GREEN)
-    text(s, 6.9, y + 0.17, 2.7, 0.5, [(big, {"bold": True, "color": GREEN})], size=24)
-    text(s, 6.9, y + 0.7, 2.7, 0.35, [small], size=9.5, color=MUTED)
+cards = (("≈ $200 / month", "whole pilot, Gemini thinking tokens included"),
+         ("≈ 2¢", "per warranty claim handled"),
+         ("+ ≈ $3", "per extra 1,000 claims; compute stays flat"))
+for i, (big, small) in enumerate(cards):
+    y = 1.45 + i * 0.93
+    box(s, 6.75, y, 2.91, 0.85, fill="FFFFFF", accent=GREEN)
+    text(s, 6.88, y + 0.1, 2.7, 0.42, [(big, {"bold": True, "color": GREEN})], size=19)
+    text(s, 6.88, y + 0.5, 2.7, 0.3, [small], size=8.5, color=MUTED)
+box(s, 6.75, 4.24, 2.91, 0.88, fill="F8FAFD", line="E8EAED")
+text(s, 6.88, 4.29, 2.7, 0.8, [("Ways to cut it", {"bold": True, "size": 9.5}),
+                               "Batch / Flex Gemini for the hourly scan (~50% off), committed-use discount on Cloud Run, scale agents to zero after hours."],
+     size=8, color=MUTED)
 footer(s, 10)
 
 # ---------- 11–13. Snapshots (two full screens per page, each explained) ----------
