@@ -200,7 +200,7 @@ def delete_slide(prs, slide):
 # extra pages cloned from the untouched template slides
 WIRE2 = clone(S[6], S[6])
 SNAPX = []
-for _ in range(4):
+for _ in range(2):
     SNAPX.append(clone(S[10], SNAPX[-1] if SNAPX else S[10]))
 
 # ---------- 1. Team details ----------
@@ -346,57 +346,61 @@ footer(s, 9)
 
 # ---------- 10. Estimated cost ----------
 s = S[9]; set_title(s, "Estimated implementation cost", "Pilot scale: one OEM, 10,000 claims and ~50 investigations a month · approx. Google Cloud list prices (USD)")
-for i, (big, small) in enumerate((("≈ $130 / month", "whole pilot on Google Cloud"), ("≈ 1.3¢", "per warranty claim handled"), ("≈ $0.08", "Gemini cost per investigation"))):
-    x = 0.33 + i * 3.13
-    box(s, x, 1.45, 3.0, 0.9, fill="FFFFFF", accent=GREEN)
-    text(s, x + 0.12, 1.55, 2.8, 0.42, [(big, {"bold": True, "color": GREEN})], size=20)
-    text(s, x + 0.12, 1.98, 2.8, 0.3, [small], size=9.5, color=MUTED)
-items = [("Cloud Run\nagents (always warm)", 100), ("Gemini 2.5 Flash\n10k claims", 12), ("BigQuery, Firestore,\nStorage, Pub/Sub", 10),
-         ("Cloud Run web\n(scales to zero)", 5), ("Gemini 2.5 Pro\n50 investigations", 4), ("Embeddings", 1)]
-cd = CategoryChartData()
-cd.categories = [n for n, _ in items]
-cd.add_series("USD / month", [v for _, v in items])
-gf = s.shapes.add_chart(XL_CHART_TYPE.COLUMN_CLUSTERED, Inches(0.33), Inches(2.5), Inches(9.33), Inches(2.62), cd)
-ch = gf.chart
-ch.has_legend = False; ch.has_title = False
-ch.font.size, ch.font.name = Pt(9), FONT
-plot = ch.plots[0]; plot.gap_width = 70; plot.has_data_labels = True
-dl = plot.data_labels; dl.number_format = '"$"0'; dl.number_format_is_linked = False; dl.position = XL_LABEL_POSITION.OUTSIDE_END
-dl.font.size, dl.font.bold = Pt(10), True
-ser = plot.series[0]; ser.format.fill.solid(); ser.format.fill.fore_color.rgb = rgb(BLUE)
-va = ch.value_axis; va.visible = False; va.has_major_gridlines = False; va.maximum_scale = 115; va.minimum_scale = 0
-ca = ch.category_axis; ca.tick_labels.font.size = Pt(9); ca.format.line.color.rgb = rgb(LINE)
+items = [("Cloud Run · agent API", "1 always-warm instance, 2 vCPU / 2 GiB", 100), ("Gemini 2.5 Flash", "10k claims × ~1.5k in / 300 out tokens", 12),
+         ("BigQuery, Firestore, Storage, Pub/Sub", "small data volumes", 10), ("Cloud Run · web app", "scales to zero", 5),
+         ("Gemini 2.5 Pro", "50 investigations × ~30k in / 3k out", 4), ("Embeddings", "10k claims + searches", 1)]
+box(s, 0.33, 1.45, 6.25, 3.67, fill="FFFFFF")
+text(s, 0.5, 1.53, 4, 0.28, [("Monthly cost by service", {"bold": True})], size=11)
+track_x, track_w = 3.15, 2.75
+for i, (name, note, v) in enumerate(items):
+    y = 1.9 + i * 0.5
+    text(s, 0.5, y, 2.6, 0.24, [(name, {"bold": True})], size=9.5)
+    text(s, 0.5, y + 0.21, 2.6, 0.22, [note], size=7.5, color=FAINT)
+    trk = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(track_x), Inches(y + 0.1), Inches(track_w), Inches(0.2))
+    trk.adjustments[0] = 0.5; trk.fill.solid(); trk.fill.fore_color.rgb = rgb("F1F3F4"); trk.line.fill.background(); trk.shadow.inherit = False
+    bw = max(0.06, track_w * v / 100)
+    bar = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(track_x), Inches(y + 0.1), Inches(bw), Inches(0.2))
+    bar.adjustments[0] = 0.5; bar.fill.solid(); bar.fill.fore_color.rgb = rgb(BLUE); bar.line.fill.background(); bar.shadow.inherit = False
+    text(s, track_x + track_w + 0.08, y + 0.06, 0.55, 0.28, [(f"${v}", {"bold": True})], size=10, align=PP_ALIGN.RIGHT)
+    if i < len(items) - 1:
+        ln = s.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(0.5), Inches(y + 0.47), Inches(6.45), Inches(y + 0.47))
+        ln.line.color.rgb = rgb("F1F3F4"); ln.line.width = Pt(0.75)
+for i, (big, small) in enumerate((("≈ $130", "per month for the whole pilot"), ("≈ 1.3¢", "per warranty claim handled"), ("≈ $0.08", "of Gemini per investigation"))):
+    y = 1.45 + i * 1.255
+    box(s, 6.75, y, 2.91, 1.16, fill="FFFFFF", accent=GREEN)
+    text(s, 6.9, y + 0.17, 2.7, 0.5, [(big, {"bold": True, "color": GREEN})], size=24)
+    text(s, 6.9, y + 0.7, 2.7, 0.35, [small], size=9.5, color=MUTED)
 footer(s, 10)
 
-# ---------- 11–15. Snapshots (one screen per page, cropped so the text is legible) ----------
-def snap_page(slide, n, k, title, img_, notes):
-    set_title(slide, f"Snapshots of the prototype ({k}/5)", title)
-    box(slide, 0.33, 1.45, 9.33, 3.0, fill="F8FAFD", line="E8EAED")
-    image(slide, img_, 0.43, 1.52, w=9.13, h=2.86)
-    for j, note in enumerate(notes):
-        x = 0.33 + j * 3.13
-        box(slide, x, 4.55, 3.0, 0.57, fill="FFFFFF")
-        num = slide.shapes.add_shape(MSO_SHAPE.OVAL, Inches(x + 0.1), Inches(4.7), Inches(0.27), Inches(0.27))
-        num.fill.solid(); num.fill.fore_color.rgb = rgb(BLUE); num.line.fill.background()
-        text(slide, x + 0.1, 4.72, 0.27, 0.25, [(str(j + 1), {"bold": True, "color": "FFFFFF"})], size=9, align=PP_ALIGN.CENTER)
-        text(slide, x + 0.45, 4.6, 2.5, 0.5, [note], size=9, color=INK, anchor=MSO_ANCHOR.MIDDLE)
-    footer(slide, n)
-
-
+# ---------- 11–13. Snapshots (two full screens per page, each explained) ----------
 SNAPS = [
-    ("Dealer: a Hindi note and a photo, read and linked in seconds", "crop-claim.png",
-     ["Gemini sees the cracked clamp in the photo", "and reads the Hindi note into structured fields", "then links the claim to the open case and tells the analyst"]),
-    ("Analyst: one click, five agents investigate live", "crop-agents.png",
-     ["Trace: 64 failing cars → one supplier, two batches", "Early warning: 307 cars of another model at risk", "Every step streams to every screen via Firestore"]),
-    ("Root cause: ranked hypotheses, each with its evidence", "crop-rootcause.png",
-     ["Hypotheses ranked with a confidence score", "Each cites PFMEA rows, control-plan gaps and claims", "Ask answers from the case data only"]),
-    ("Supplier quality: the 8D, drafted and cited", "crop-8d.png",
-     ["Header facts come from BigQuery", "D0–D8 drafted by Gemini, with sources", "The engineer edits, then approves"]),
-    ("Tier-1 supplier: Gemini checks the reply against the evidence", "crop-supplier.png",
-     ["The supplier sees only its own cases", "The OEM’s findings and containment counts", "Gaps flagged before the OEM accepts the reply"]),
+    ("Dealer · file a claim", "full-05-claim-result.jpg",
+     "Ravi writes a short note in Hindi and adds a photo. Gemini reads both, spots the cracked clamp, and links the claim "
+     "to the open coolant-leak case in seconds. The analyst is notified."),
+    ("Analyst · five agents investigate live", "full-07-agent-log-live.jpg",
+     "One click on Investigate. The agent log streams from Firestore as Trace finds two supplier batches and 307 cars at "
+     "risk, Hypothesise checks the PFMEA, and Draft writes the 8D."),
+    ("Analyst · root cause and Ask", "full-09-root-cause-ask.jpg",
+     "Root causes ranked by confidence, each citing PFMEA rows, control-plan gaps and claims. Ask answers questions from "
+     "the case data only, with sources."),
+    ("Supplier quality · the 8D report", "full-10-8d-report.jpg",
+     "A full 8D drafted with sources. Header facts and parts to quarantine come from BigQuery, not the model. Kenji edits "
+     "any section, then approves and sends it to the supplier."),
+    ("Tier-1 supplier · reply checked by Gemini", "full-12-supplier-ai-check.jpg",
+     "Suresh sees only his company’s cases. Gemini checks his reply against the OEM’s evidence and lists "
+     "the gaps before the OEM accepts it."),
+    ("Head of quality · network overview", "full-14-overview.jpg",
+     "Meera sees claims, cost by category, open cases by stage and vehicles at risk across the whole network, on any "
+     "screen from monitor to phone."),
 ]
-for k, (slide, (t, img_, notes)) in enumerate(zip([S[10]] + SNAPX, SNAPS)):
-    snap_page(slide, 11 + k, k + 1, t, img_, notes)
+for k, slide in enumerate([S[10]] + SNAPX):
+    set_title(slide, f"Snapshots of the prototype ({k + 1}/3)")
+    for j, (t, img_, d) in enumerate(SNAPS[k * 2:k * 2 + 2]):
+        x = 0.33 + j * 4.75
+        image(slide, img_, x, 1.3, w=4.58)
+        text(slide, x, 4.2, 4.58, 0.28, [(t, {"bold": True})], size=11)
+        text(slide, x, 4.46, 4.58, 0.7, [d], size=9, color=MUTED)
+    footer(slide, 11 + k)
 
 # ---------- 13. Performance ----------
 s = S[11]; set_title(s, "Prototype performance report / benchmarking", "Measured on the deployed prototype with our test dataset (6,400 vehicles, 630+ claims, 3 languages)")
@@ -417,7 +421,7 @@ for i, (v, l, b, col) in enumerate(kpis):
     text(s, x + 0.17, y + 0.08, 2.75, 0.45, [(v, {"bold": True, "color": col})], size=20)
     text(s, x + 0.17, y + 0.53, 2.75, 0.28, [(l, {"bold": True})], size=10)
     text(s, x + 0.17, y + 0.79, 2.75, 0.28, [b], size=8.5, color=MUTED)
-footer(s, 16)
+footer(s, 14)
 
 # ---------- 13. Future ----------
 s = S[12]; set_title(s, "Additional details / future development")
@@ -430,7 +434,7 @@ fut = [("Next 90 days · pilot", "Run on one OEM’s real dealer claims and buil
 for i, (t, b, col) in enumerate(fut):
     x = 0.33 + (i % 3) * 3.13; y = 1.42 + (i // 3) * 1.85
     card(s, x, y, 3.0, 1.7, t, b, accent=col, title_size=11, body_size=9.5)
-footer(s, 17)
+footer(s, 15)
 
 # ---------- 15. Links ----------
 s = S[13]; set_title(s, "Links")
@@ -447,7 +451,7 @@ for i, (t, url, note, col) in enumerate(rows):
     text(s, 0.55, y + 0.42, 4.3, 0.35, [note], size=8.5, color=MUTED)
     tb = s.shapes.add_textbox(Inches(4.9), Inches(y + 0.2), Inches(4.7), Inches(0.4)); tb.text_frame.word_wrap = True
     link(tb.text_frame, url, url if url.startswith("http") else LINK, size=11, first=True)
-footer(s, 18)
+footer(s, 16)
 
 # ---------- remove the template's instruction slide and the empty extra slide ----------
 for sl in (S[1], S[14]):
