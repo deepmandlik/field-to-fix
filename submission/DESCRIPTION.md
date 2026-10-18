@@ -3,6 +3,8 @@
 **Team:** Field-to-Fix · Deep Mandlik (team leader), Pranali Shinde
 **Theme:** Manufacturing · Intelligent Operations & Industrial Efficiency
 **Live prototype:** https://f2f-web-lc64mw36wq-as.a.run.app (tick “I’m a judge” on the login page)
+**Demo video:** https://drive.google.com/file/d/13FqNQnWm67ml6OBLyBttgP9fU-pn3wZ5/view?usp=sharing
+**Code:** https://github.com/deepmandlik/field-to-fix
 
 ## What we built
 

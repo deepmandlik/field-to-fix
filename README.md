@@ -7,6 +7,15 @@ Built for the Google Cloud AI Builder Cup 2026 (Manufacturing: Intelligent Opera
 language, spots failure clusters early, traces them to the exact part, supplier and production batch, and
 drafts the 8D corrective-action report for the supplier-quality engineer to approve.
 
+**Team:** Deep Mandlik (team leader), Pranali Shinde
+
+| | |
+|---|---|
+| Live prototype (Cloud Run) | https://f2f-web-lc64mw36wq-as.a.run.app — tick “I’m a judge” on the login page |
+| Watch view | https://f2f-web-lc64mw36wq-as.a.run.app/watch |
+| Demo video (3:14) | https://drive.google.com/file/d/13FqNQnWm67ml6OBLyBttgP9fU-pn3wZ5/view?usp=sharing |
+| Brief description | [submission/DESCRIPTION.md](submission/DESCRIPTION.md) |
+
 ## Architecture
 
 ```
