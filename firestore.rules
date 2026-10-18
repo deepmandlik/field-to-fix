@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function role() { return request.auth.token.role; }
+
+    // Cases are written only by the agent API (service account). Clients read.
+    match /cases/{caseId} {
+      allow read: if signedIn() && (
+        role() != 'supplier' || resource.data.supplier_id == request.auth.token.org_id);
+      allow write: if false;
+      match /{sub=**} {
+        allow read: if signedIn() && (
+          role() != 'supplier' || get(/databases/$(database)/documents/cases/$(caseId)).data.supplier_id == request.auth.token.org_id);
+        allow write: if false;
+      }
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}
