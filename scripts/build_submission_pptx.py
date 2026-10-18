@@ -4,6 +4,7 @@ Usage: python scripts/build_submission_pptx.py <template.pptx> <images dir> <out
 """
 from __future__ import annotations
 
+import os
 import sys
 from copy import deepcopy
 
@@ -11,12 +12,16 @@ from lxml import etree
 from PIL import Image
 from pptx import Presentation
 from pptx.dml.color import RGBColor
+from pptx.chart.data import CategoryChartData
+from pptx.enum.chart import XL_CHART_TYPE, XL_LABEL_POSITION
 from pptx.enum.shapes import MSO_CONNECTOR, MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.oxml.ns import qn
 from pptx.util import Emu, Inches, Pt
 
 TEMPLATE, IMG, OUT = sys.argv[1:4]
+GITHUB = "https://github.com/deepmandlik/field-to-fix"
+VIDEO = os.environ.get("F2F_VIDEO_URL", "")
 FONT = "Arial"
 INK, MUTED, FAINT, LINE = "1F1F1F", "444746", "747775", "DADCE0"
 BLUE, BLUE_SOFT, ORANGE, RED, GREEN, PURPLE, TEAL, AMBER = "0B57D0", "E8F0FE", "E8710A", "B3261E", "188038", "9334E6", "12B5CB", "F9AB00"
@@ -134,6 +139,52 @@ def footer(slide, n):
     text(slide, 9.0, 5.22, 0.7, 0.25, [str(n)], size=8, color=FAINT, align=PP_ALIGN.RIGHT)
 
 
+def clone(src, after):
+    """Duplicate a template slide (its pictures included) and place it right after `after`."""
+    new = prs.slides.add_slide(src.slide_layout)
+    for shp in list(new.shapes):
+        shp._element.getparent().remove(shp._element)
+    rid_map = {}
+    for rid, rel in src.part.rels.items():
+        if "image" in rel.reltype:
+            rid_map[rid] = new.part.relate_to(rel._target, rel.reltype)
+    for el in src.shapes._spTree.iterchildren():
+        if el.tag.endswith("}nvGrpSpPr") or el.tag.endswith("}grpSpPr"):
+            continue
+        el = deepcopy(el)
+        for node in el.iter():
+            for attr in (qn("r:embed"), qn("r:link")):
+                if node.get(attr) in rid_map:
+                    node.set(attr, rid_map[node.get(attr)])
+        new.shapes._spTree.append(el)
+    lst = prs.slides._sldIdLst
+    ids = list(lst)
+    me = ids[-1]
+    idx = next(i for i, sid in enumerate(ids) if prs.part.related_part(sid.get(qn("r:id"))) is after.part)
+    lst.remove(me); lst.insert(idx + 1, me)
+    return new
+
+
+def rounded_pic(slide, name, x, y, w=None, h=None, radius=0.06):
+    pic = image(slide, name, x, y, w, h, border=False)
+    pic.auto_shape_type = MSO_SHAPE.ROUNDED_RECTANGLE
+    geom = pic._element.spPr.find(qn("a:prstGeom"))
+    av = geom.find(qn("a:avLst"))
+    if av is None:
+        av = etree.SubElement(geom, qn("a:avLst"))
+    gd = etree.SubElement(av, qn("a:gd")); gd.set("name", "adj"); gd.set("fmla", f"val {int(radius * 100000)}")
+    return pic
+
+
+def link(tf, label, url, size=12, first=False):
+    p = tf.paragraphs[0] if first else tf.add_paragraph()
+    p.space_after = Pt(2)
+    r = p.add_run(); r.text = label
+    r.font.name, r.font.size, r.font.color.rgb, r.font.underline = FONT, Pt(size), rgb(BLUE), True
+    r.hyperlink.address = url
+    return p
+
+
 def delete_slide(prs, slide):
     sld = prs.slides._sldIdLst
     for sid in list(sld):
@@ -145,6 +196,10 @@ def delete_slide(prs, slide):
             sld.remove(s)
     prs.part.drop_rel(rid)
 
+
+# extra pages cloned from the untouched template slides
+WIRE2 = clone(S[6], S[6])
+SNAP2 = clone(S[10], S[10])
 
 # ---------- 1. Team details ----------
 s = S[0]
@@ -167,58 +222,46 @@ for label, val in (("Team name: ", "Field-to-Fix"), ("Team leader name: ", "Deep
     etree.SubElement(pPr, qn("a:buNone"))
     pPr.set("marL", "0"); pPr.set("indent", "0")
 
-# ---------- 3. Brief about the idea ----------
+# ---------- 2. Brief about the idea ----------
 s = S[2]; set_title(s, "Brief about the idea", "Field-to-Fix: dealers file it, OEMs approve it, suppliers solve it")
-text(s, 0.33, 1.5, 4.6, 3.6, [
-    ("The problem", {"bold": True, "color": RED, "size": 12}),
-    "A part fails in the field. The dealer fixes it and writes a short note, often in Hindi or Bahasa. Car makers take about 7 weeks "
-    "to find the root cause and 9–10 more to fix it at the supplier, while bad parts keep shipping (≈ $58B a year in warranty).",
-    ("Our idea", {"bold": True, "color": BLUE, "size": 12}),
-    "Five Gemini agents on Google Cloud read every claim (text, photo, voice, any language), find failure clusters early, trace them "
-    "to the exact supplier batch, rank root causes against the factory PFMEA, and draft the 8D report. People approve every step.",
-    ("The result", {"bold": True, "color": GREEN, "size": 12}),
-    "From first claims to an 8D at the supplier in under a day instead of ~19 weeks, on web, phone and smartwatch.",
-], size=10, color=MUTED)
-image(s, "02-start.jpg", 5.15, 1.5, w=4.5, h=3.5)
+blocks = [("The problem", RED, "A part fails in the field. The dealer fixes it and writes a short note, often in Hindi or Bahasa. Car makers take about "
+           "7 weeks to find the root cause and 9–10 more to fix it at the supplier, while bad parts keep shipping (≈ $58B a year in warranty)."),
+          ("Our idea", BLUE, "Five Gemini agents on Google Cloud read every claim (text, photo, voice, any language), spot failure clusters early, trace "
+           "them to the exact supplier batch, rank root causes against the factory PFMEA and draft the 8D. People approve every step."),
+          ("The result", GREEN, "From first claims to an 8D at the supplier in under a day instead of ~19 weeks, on web, phone and smartwatch.")]
+y = 1.5
+for t, col, b in blocks:
+    dot = s.shapes.add_shape(MSO_SHAPE.OVAL, Inches(0.33), Inches(y + 0.04), Inches(0.16), Inches(0.16))
+    dot.fill.solid(); dot.fill.fore_color.rgb = rgb(col); dot.line.fill.background()
+    text(s, 0.58, y - 0.03, 4.1, 0.3, [(t, {"bold": True, "color": col})], size=12)
+    tb = text(s, 0.58, y + 0.25, 4.1, 1.0, [b], size=9.5, color=MUTED)
+    y += 1.22 if len(b) > 150 else 0.8
+rounded_pic(s, "hero3d.png", 4.95, 1.45, w=4.7, h=2.69)
+for i, (big, small, col) in enumerate((("< 1 day", "was ~19 weeks", GREEN), ("5 agents", "Gemini on Vertex AI", BLUE), ("3 screens", "web · phone · watch", ORANGE))):
+    x = 4.95 + i * 1.6
+    box(s, x, 4.27, 1.5, 0.82, fill="FFFFFF", accent=col)
+    text(s, x, 4.38, 1.5, 0.35, [(big, {"bold": True, "color": col})], size=15, align=PP_ALIGN.CENTER)
+    text(s, x, 4.72, 1.5, 0.3, [small], size=8.5, color=MUTED, align=PP_ALIGN.CENTER)
 footer(s, 2)
 
-# ---------- 4. Opportunities ----------
+# ---------- 3. Opportunities ----------
 s = S[3]; set_title(s, "Opportunities")
-qs = [
-    ("How is it different from existing ideas?", BLUE,
-     "Warranty-analytics tools score structured codes and dashboards. Field-to-Fix reads the unstructured part (multilingual notes, photos, "
-     "PFMEA PDFs), links the dealer, OEM and Tier-1 supplier on one live case, and writes the 8D, with every statement cited."),
-    ("How will it solve the problem?", ORANGE,
-     "A new claim is linked to its case in ~6 s instead of the monthly review. One click traces the cluster to supplier batches "
-     "and drafts a cited 8D in ~1 minute. Gemini also checks the supplier’s reply for gaps before the OEM accepts it."),
-    ("USP of the proposed solution", GREEN,
-     "Early warning before failures (vehicles at risk with no claims yet) · numbers from BigQuery, never the model · human approval "
-     "on every outbound step · works for gloved technicians on a smartwatch · built for JAPAC dealer networks, works for any OEM."),
+image(s, "opps3d.png", 0.33, 1.2, w=9.33, border=False)
+answers = [
+    "Warranty-analytics tools score structured codes on dashboards. Field-to-Fix reads the unstructured part (multilingual notes, photos, "
+    "PFMEA documents), puts the dealer, OEM and Tier-1 supplier on one live case, and writes the 8D with every statement cited.",
+    "A new claim joins its case in ~6 s instead of waiting for the monthly review. One click traces the cluster to supplier batches and "
+    "drafts a cited 8D in about a minute. Gemini then checks the supplier’s reply for gaps before the OEM accepts it.",
+    "Early warning: cars at risk before they fail. Numbers come from BigQuery, never the model. A person approves every outbound step. "
+    "Works for gloved technicians on a smartwatch. Built for JAPAC dealer networks, works for any OEM.",
 ]
-for i, (q, col, a) in enumerate(qs):
-    card(s, 0.33, 1.42 + i * 1.25, 9.33, 1.13, q, a, accent=col, body_size=10)
+for i, a in enumerate(answers):
+    text(s, 0.55 + i * 3.1, 3.0, 2.85, 2.1, [a], size=10, color=MUTED)
 footer(s, 3)
 
-# ---------- 5. Features ----------
+# ---------- 4. Features ----------
 s = S[4]; set_title(s, "List of features offered by the solution")
-feats = [
-    ("Multilingual + photo intake", "Gemini reads notes in any language and sees damage in photos", ORANGE),
-    ("Live claim linking", "New claims join the right case in ~6 s by meaning", ORANGE),
-    ("Signal clustering", "Embeddings group claims; growth vs baseline ranks cases", BLUE),
-    ("Trace to supplier batch", "Failing VINs → part → supplier → batch, with lift", TEAL),
-    ("Cited root causes", "Hypotheses checked against PFMEA and control plan", PURPLE),
-    ("AI-drafted 8D + PDF", "D2–D5 drafted with sources; containment from stock data", GREEN),
-    ("Supplier portal + AI check", "Tier-1 sees only its cases; Gemini flags gaps in replies", AMBER),
-    ("Ask Gemini", "Grounded chat over one case, with clickable citations", PURPLE),
-    ("Five roles, one workflow", "Dealer → analyst → SQE → supplier → head of quality", BLUE),
-    ("Lifecycle + audit tree", "Every agent step and approval, time-stamped", BLUE),
-    ("Smartwatch app", "Alerts, hold-to-approve, dictated claims (Apple/Wear OS)", RED),
-    ("Dashboards + guided demo", "Analytics on every page; six-step judge walkthrough", GREEN),
-]
-cw, ch = 2.26, 0.98
-for i, (t, b, col) in enumerate(feats):
-    x = 0.33 + (i % 4) * (cw + 0.1); y = 1.42 + (i // 4) * (ch + 0.12)
-    card(s, x, y, cw, ch, t, b, accent=col, title_size=10.5, body_size=9)
+image(s, "features3d.png", 0.33, 1.22, w=9.33, border=False)
 footer(s, 4)
 
 # ---------- 6. Process flow ----------
@@ -255,123 +298,114 @@ for i, st in enumerate(states):
 text(s, 0.33, 4.78, 9.33, 0.3, ["Case lifecycle with loops: SQE can request more evidence; SQE sends a reply back when the AI finds gaps."], size=9, color=FAINT)
 footer(s, 5)
 
-# ---------- 7. Wireframes / mocks ----------
-s = S[6]; set_title(s, "Wireframes / mock screens of the solution", "Real screens from the working prototype")
-image(s, "05-claim-result.jpg", 0.33, 1.45, w=3.55, h=2.25)
-image(s, "08-case-overview.jpg", 4.0, 1.45, w=3.55, h=2.25)
-image(s, "w1-apple-analyst.jpg", 7.75, 1.4, w=1.9, h=2.3, border=False)
-for x, cap in ((0.33, "Claim: Gemini reads note + photo, links the case"), (4.0, "Case overview: trace, charts, early warning"), (7.6, "Watch: your queue on the wrist")):
-    text(s, x, 3.75, 3.5 if x < 7 else 2.1, 0.3, [cap], size=9, color=MUTED)
-image(s, "p1-phone-claim.jpg", 0.33, 4.05, h=1.1)
-image(s, "p2-phone-case.jpg", 0.95, 4.05, h=1.1)
-text(s, 1.65, 4.25, 7.8, 0.7, ["Responsive: monitor, laptop, iPad and phone from one codebase; a separate wrist view (/w) for Apple Watch and Wear OS."], size=9.5, color=MUTED)
+# ---------- 6–7. Wireframes / mocks (two pages) ----------
+s = S[6]; set_title(s, "Wireframes / mock screens of the solution (1/2)", "Desktop and laptop: real screens from the working prototype")
+image(s, "wire-desktop.png", 0.5, 1.42, w=9.0, border=False)
 footer(s, 6)
+s2 = WIRE2; set_title(s2, "Wireframes / mock screens of the solution (2/2)", "Phone and smartwatch: the same live case on the move, at lunch or on the shop floor")
+image(s2, "wire-mobile.png", 0.5, 1.42, w=9.0, border=False)
+footer(s2, 7)
 
 # ---------- 8. Architecture ----------
-s = S[7]; set_title(s, "Architecture diagram of the proposed solution", "Two Cloud Run services, five agents, one live database · region asia-southeast1")
-card(s, 0.33, 1.55, 1.6, 1.75, "People", ["Dealer", "Analyst", "Supplier quality", "Tier-1 supplier", "Head of quality", "Web · phone · watch"], accent=INK, body_size=9)
-card(s, 2.2, 1.55, 1.95, 0.95, "Cloud Run · web", "Next.js + Firebase Auth (5 roles)", accent=BLUE, body_size=9)
-card(s, 4.45, 1.55, 2.1, 0.95, "Cloud Run · agents", "FastAPI: 5 agents + Ask", accent=BLUE, body_size=9)
-card(s, 7.2, 1.42, 2.45, 0.78, "Vertex AI · Gemini", "2.5 Flash, 2.5 Pro, embeddings", accent=AMBER, body_size=9)
-card(s, 7.2, 2.33, 2.45, 0.78, "BigQuery", "Claims, vehicles, batches, PFMEA", accent=AMBER, body_size=9)
-card(s, 7.2, 3.24, 2.45, 0.78, "Cloud Storage", "Claim photos, voice notes", accent=AMBER, body_size=9)
-card(s, 2.2, 3.05, 1.95, 0.95, "Firestore", "Live cases + agent log (realtime)", accent=GREEN, body_size=9)
-card(s, 4.45, 3.05, 2.1, 0.95, "Pub/Sub · Scheduler", "Async intake, hourly scan", accent=GREEN, body_size=9)
-arrow(s, 1.95, 2.02, 2.18, 2.02)
-arrow(s, 4.17, 2.02, 4.43, 2.02)
-elbow(s, 6.57, 1.8, 7.18, 1.81, color="B06000")
-arrow(s, 6.57, 2.02, 7.18, 2.72, color="B06000")
-elbow(s, 6.57, 2.25, 7.18, 3.63, color="B06000")
-arrow(s, 3.17, 2.52, 3.17, 3.03, color=GREEN)
-arrow(s, 5.5, 2.52, 5.5, 3.03, color=GREEN)
-arrow(s, 4.43, 2.4, 4.17, 3.3, color=GREEN)
-text(s, 0.33, 4.25, 9.33, 0.9, [
-    ("Flow: ", {"bold": True, "color": INK}),
-    "Firebase Auth signs people in · the web app calls the agent API · agents call Gemini on Vertex AI, read/write BigQuery and Storage, "
-    "write every step to Firestore · every screen listens to Firestore, so updates are live · no API keys: one service account.",
-], size=9, color=MUTED)
-footer(s, 7)
+s = S[7]; set_title(s, "Architecture diagram of the proposed solution", "Four layers on Google Cloud · two Cloud Run services · region asia-southeast1 · no API keys, one service account")
+image(s, "arch3d.png", 0.45, 1.42, w=9.1, border=False)
+footer(s, 8)
 
 # ---------- 9. Technologies ----------
 s = S[8]; set_title(s, "Technologies used in the solution")
-rows = [("Layer", "Technology", "Used for"),
-        ("Generative AI", "Gemini 2.5 Flash · Gemini 2.5 Pro (Vertex AI)", "Intake (text, photo, voice), root cause, 8D drafting, Ask, gap check"),
-        ("Embeddings", "gemini-embedding-001 · HDBSCAN", "Grouping claims by meaning, live claim linking"),
-        ("Images", "Gemini 2.5 Flash Image", "Demo sample photos"),
-        ("Voice", "Cloud Text-to-Speech (Chirp 3 HD)", "Demo video narration"),
-        ("Compute", "Cloud Run (2 services)", "Next.js web app · FastAPI agent API"),
-        ("Auth", "Firebase Authentication", "Five roles via custom claims, demo account"),
-        ("Realtime data", "Firestore", "Cases, agent events, 8D, chat; live UI"),
-        ("Analytics data", "BigQuery", "Claims, vehicles, batches, stock, PFMEA"),
-        ("Files / events", "Cloud Storage · Pub/Sub · Cloud Scheduler", "Photos, async intake, hourly signal scan"),
-        ("Frontend", "Next.js 14, React, TypeScript", "Responsive web, phone and watch views")]
-tbl = s.shapes.add_table(len(rows), 3, Inches(0.33), Inches(1.4), Inches(9.33), Inches(3.7)).table
-for c, w in enumerate((1.6, 3.4, 4.33)):
-    tbl.columns[c].width = Inches(w)
-for r, row in enumerate(rows):
-    for c, val in enumerate(row):
-        cell = tbl.cell(r, c); cell.text = ""
-        para(cell.text_frame, val, size=9.5 if r else 10, bold=(r == 0 or c == 0), color="FFFFFF" if r == 0 else (INK if c < 2 else MUTED), first=True, space=0)
-        cell.fill.solid(); cell.fill.fore_color.rgb = rgb(BLUE if r == 0 else ("F8FAFD" if r % 2 else "FFFFFF"))
-        cell.margin_top = cell.margin_bottom = Inches(0.03)
-footer(s, 8)
+groups = [
+    ("Gemini on Vertex AI", BLUE, [("Gemini 2.5 Flash", "Intake (text, photo, voice), Ask, gap check"), ("Gemini 2.5 Pro", "Root causes vs PFMEA, 8D drafting"),
+                                    ("gemini-embedding-001", "Clustering (HDBSCAN), live linking"), ("Gemini 2.5 Flash Image", "Demo photos and deck art")]),
+    ("Cloud Run + Firebase", ORANGE, [("Cloud Run", "Next.js web app + FastAPI agent API"), ("Firebase Authentication", "Five roles via custom claims + judge"),
+                                      ("Firestore", "Live cases, agent log, 8D, chat"), ("Security rules", "Suppliers see only their cases")]),
+    ("Data + events", GREEN, [("BigQuery", "Claims, vehicles, batches, stock, PFMEA"), ("Cloud Storage", "Claim photos and voice notes"),
+                              ("Pub/Sub", "Asynchronous claim intake"), ("Cloud Scheduler", "Hourly signal scan")]),
+    ("App + media", PURPLE, [("Next.js 14 · React · TS", "Responsive web, phone, watch views"), ("Python 3.11 · FastAPI", "Agents, tools, 8D PDF (reportlab)"),
+                             ("Cloud Text-to-Speech", "Chirp 3 HD video narration"), ("Remotion", "Motion-design demo video")]),
+]
+gw = 2.24
+for i, (g, col, items) in enumerate(groups):
+    x = 0.33 + i * (gw + 0.123)
+    box(s, x, 1.4, gw, 3.72, fill="FFFFFF")
+    head_ = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(x), Inches(1.4), Inches(gw), Inches(0.5))
+    head_.adjustments[0] = 0.2; head_.fill.solid(); head_.fill.fore_color.rgb = rgb(col); head_.line.fill.background()
+    text(s, x, 1.47, gw, 0.35, [(g, {"bold": True, "color": "FFFFFF"})], size=11.5, align=PP_ALIGN.CENTER)
+    for j, (n, u) in enumerate(items):
+        y = 2.05 + j * 0.76
+        tile = box(s, x + 0.1, y, gw - 0.2, 0.66, fill="F8FAFD", line="E8EAED")
+        bar = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(x + 0.1), Inches(y + 0.1), Inches(0.05), Inches(0.46))
+        bar.fill.solid(); bar.fill.fore_color.rgb = rgb(col); bar.line.fill.background()
+        text(s, x + 0.22, y + 0.06, gw - 0.38, 0.25, [(n, {"bold": True})], size=9.5)
+        text(s, x + 0.22, y + 0.3, gw - 0.38, 0.35, [u], size=8.5, color=MUTED)
+footer(s, 9)
 
 # ---------- 10. Estimated cost ----------
 s = S[9]; set_title(s, "Estimated implementation cost", "Pilot scale: one OEM, 10,000 claims and ~50 investigations a month · approx. Google Cloud list prices (USD)")
-rows = [("Item", "Assumption", "Per month"),
-        ("Gemini 2.5 Flash (Intake, Ask, checks)", "10k claims × ~1.5k input / 300 output tokens", "≈ $12"),
-        ("Gemini 2.5 Pro (root cause + 8D)", "50 investigations × ~30k input / 3k output tokens", "≈ $4"),
-        ("Embeddings", "10k claims + searches", "< $1"),
-        ("Cloud Run · agents", "1 always-warm instance, 2 vCPU / 2 GiB", "≈ $100"),
-        ("Cloud Run · web", "Scales to zero", "≈ $5"),
-        ("BigQuery, Firestore, Storage, Pub/Sub", "Small data volumes", "≈ $10"),
-        ("Total", "", "≈ $130 / month")]
-tbl = s.shapes.add_table(len(rows), 3, Inches(0.33), Inches(1.5), Inches(9.33), Inches(2.6)).table
-for c, w in enumerate((3.2, 4.53, 1.6)):
-    tbl.columns[c].width = Inches(w)
-for r, row in enumerate(rows):
-    for c, val in enumerate(row):
-        cell = tbl.cell(r, c); cell.text = ""
-        last = r == len(rows) - 1
-        para(cell.text_frame, val, size=10, bold=(r == 0 or last), color="FFFFFF" if r == 0 else INK, first=True, space=0,
-             align=PP_ALIGN.RIGHT if c == 2 else PP_ALIGN.LEFT)
-        cell.fill.solid(); cell.fill.fore_color.rgb = rgb(BLUE if r == 0 else ("E6F4EA" if last else "FFFFFF"))
-text(s, 0.33, 4.3, 9.33, 0.8, ["For comparison: one avoided week of shipping a defective part can cost far more than a year of running Field-to-Fix. "
-                               "Estimates use public list prices and will vary with real claim volumes; development used Google Cloud free-trial credits."],
-     size=9.5, color=MUTED)
-footer(s, 9)
-
-# ---------- 11. Snapshots ----------
-s = S[10]; set_title(s, "Snapshots of the prototype")
-snaps = [("snap-claim.jpg", "1 · Dealer: Gemini reads the note and the photo"), ("snap-agents.jpg", "2 · Analyst: five agents stream their work live"),
-         ("snap-8d.jpg", "3 · Supplier quality: a cited 8D report"), ("snap-supplier.jpg", "4 · Supplier: Gemini flags 4 gaps in the reply")]
-for i, (img, cap) in enumerate(snaps):
-    x = 0.33 + (i % 2) * 4.72; y = 1.3 + (i // 2) * 1.98
-    image(s, img, x, y, w=4.6, h=1.68)
-    text(s, x, y + 1.7, 4.6, 0.25, [cap], size=9, color=MUTED, align=PP_ALIGN.CENTER)
+items = [("Cloud Run · agents (always warm)", 100), ("Gemini 2.5 Flash · 10k claims", 12), ("BigQuery, Firestore, Storage, Pub/Sub", 10),
+         ("Cloud Run · web (scales to zero)", 5), ("Gemini 2.5 Pro · 50 investigations", 4), ("Embeddings", 1)]
+cd = CategoryChartData()
+cd.categories = [n for n, _ in items][::-1]
+cd.add_series("USD / month", [v for _, v in items][::-1])
+gf = s.shapes.add_chart(XL_CHART_TYPE.BAR_CLUSTERED, Inches(0.33), Inches(1.45), Inches(6.2), Inches(3.6), cd)
+ch = gf.chart
+ch.has_legend = False; ch.has_title = False
+ch.font.size, ch.font.name = Pt(9), FONT
+plot = ch.plots[0]; plot.gap_width = 45; plot.has_data_labels = True
+dl = plot.data_labels; dl.number_format = '"$"0'; dl.number_format_is_linked = False; dl.position = XL_LABEL_POSITION.OUTSIDE_END
+dl.font.size, dl.font.bold = Pt(10), True
+cols = [BLUE, ORANGE, GREEN, BLUE, PURPLE, TEAL][::-1]
+for i, pt in enumerate(plot.series[0].points):
+    pt.format.fill.solid(); pt.format.fill.fore_color.rgb = rgb(cols[i])
+va = ch.value_axis; va.visible = False; va.has_major_gridlines = False; va.maximum_scale = 118
+ca = ch.category_axis; ca.format.line.fill.background(); ca.tick_labels.font.size = Pt(9.5)
+for i, (big, small, col) in enumerate((("≈ $130", "per month, whole pilot", GREEN), ("≈ 1.3¢", "per warranty claim handled", BLUE), ("≈ $0.08", "Gemini cost per investigation", PURPLE))):
+    y = 1.45 + i * 1.22
+    box(s, 6.75, y, 2.9, 1.1, fill="FFFFFF", accent=col)
+    text(s, 6.85, y + 0.14, 2.7, 0.5, [(big, {"bold": True, "color": col})], size=24)
+    text(s, 6.85, y + 0.66, 2.7, 0.35, [small], size=9.5, color=MUTED)
 footer(s, 10)
 
-# ---------- 12. Performance ----------
+# ---------- 11–12. Snapshots (two pages) ----------
+def snaps_page(slide, items, n, title):
+    set_title(slide, title)
+    (big, bcap), *rest = items
+    box(slide, 0.33, 1.3, 5.55, 3.82, fill="F8FAFD", line="E8EAED")
+    image(slide, big, 0.43, 1.4, w=5.35, h=3.25)
+    text(slide, 0.43, 4.72, 5.35, 0.3, [bcap], size=10, color=INK, bold=True, align=PP_ALIGN.CENTER)
+    for j, (img_, c) in enumerate(rest):
+        y = 1.3 + j * 1.95
+        box(slide, 6.03, y, 3.63, 1.87, fill="F8FAFD", line="E8EAED")
+        image(slide, img_, 6.1, y + 0.07, w=3.49, h=1.45)
+        text(slide, 6.1, y + 1.55, 3.49, 0.28, [c], size=9, color=INK, bold=True, align=PP_ALIGN.CENTER)
+    footer(slide, n)
+
+
+snaps_page(S[10], [("snap-agents.jpg", "Analyst: one click, five agents stream their work live"), ("05-claim-result.jpg", "Dealer: Gemini reads the note and the photo"),
+                   ("09-root-cause-ask.jpg", "Ask: grounded answers with citations")], 11, "Snapshots of the prototype (1/2)")
+s2 = SNAP2
+snaps_page(s2, [("snap-8d.jpg", "Supplier quality: a cited 8D, containment from BigQuery"), ("12-supplier-nosidebar.jpg", "Supplier: Gemini flags 4 gaps in the reply"),
+                ("13-activity-tree.jpg", "Audit: every agent step and decision")], 12, "Snapshots of the prototype (2/2)")
+
+# ---------- 13. Performance ----------
 s = S[11]; set_title(s, "Prototype performance report / benchmarking", "Measured on the deployed prototype with our synthetic dataset (6,400 vehicles, 630+ claims, 3 languages)")
-rows = [("Measure", "Result", "Baseline / note"),
-        ("Claim → linked to the right case", "~6 s (warm), 0.97–0.99 similarity", "Monthly warranty review"),
-        ("Click → cited 8D draft (5 agents)", "59 s live run", "~7 weeks to confirmed root cause"),
-        ("First claims → 8D at supplier", "< 1 day", "~19 weeks incl. countermeasure"),
-        ("Intake: failure category correct", "630 / 630 (100%)", "Synthetic notes are clean; real data will be lower"),
-        ("Hindi notes understood", "162 / 162", "Plus Bahasa and English"),
-        ("Planted failure cluster recalled", "56 / 56 claims", "Merged near-duplicate clusters (0.92 cosine)"),
-        ("Trace found the bad batches", "KAV-26W31 and W32 (lift 2.3× / 1.9×)", "Matches ground truth"),
-        ("Vehicles flagged before failure", "307", "Same batch, other model, 0 claims yet"),
-        ("Supplier reply gaps caught", "4", "Root-cause contradiction detected")]
-tbl = s.shapes.add_table(len(rows), 3, Inches(0.33), Inches(1.4), Inches(9.33), Inches(3.7)).table
-for c, w in enumerate((3.3, 2.8, 3.23)):
-    tbl.columns[c].width = Inches(w)
-for r, row in enumerate(rows):
-    for c, val in enumerate(row):
-        cell = tbl.cell(r, c); cell.text = ""
-        para(cell.text_frame, val, size=9.5, bold=(r == 0 or c == 1), color="FFFFFF" if r == 0 else (GREEN if c == 1 else (INK if c == 0 else MUTED)), first=True, space=0)
-        cell.fill.solid(); cell.fill.fore_color.rgb = rgb(BLUE if r == 0 else ("F8FAFD" if r % 2 else "FFFFFF"))
-footer(s, 11)
+kpis = [("~6 s", "Claim → linked to its case", "vs the monthly warranty review", BLUE),
+        ("59 s", "Click → cited 8D draft", "vs ~7 weeks to the root cause", PURPLE),
+        ("< 1 day", "First claims → 8D at supplier", "vs ~19 weeks incl. countermeasure", GREEN),
+        ("630 / 630", "Failure category correct", "clean synthetic notes; real data lower", ORANGE),
+        ("162 / 162", "Hindi notes understood", "plus Bahasa and English", ORANGE),
+        ("56 / 56", "Planted failure claims recalled", "near-duplicate clusters merged at 0.92", BLUE),
+        ("2 / 2", "Bad supplier batches found", "KAV-26W31, W32 · lift 2.3× / 1.9×", TEAL),
+        ("307", "Cars flagged before failure", "same batch, other model, 0 claims yet", RED),
+        ("4", "Gaps caught in supplier reply", "root-cause contradiction detected", AMBER)]
+for i, (v, l, b, col) in enumerate(kpis):
+    x = 0.33 + (i % 3) * 3.13; y = 1.45 + (i // 3) * 1.24
+    box(s, x, y, 3.0, 1.12, fill="FFFFFF")
+    bar = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(x), Inches(y + 0.14), Inches(0.06), Inches(0.84))
+    bar.fill.solid(); bar.fill.fore_color.rgb = rgb(col); bar.line.fill.background()
+    text(s, x + 0.17, y + 0.08, 2.75, 0.45, [(v, {"bold": True, "color": col})], size=20)
+    text(s, x + 0.17, y + 0.53, 2.75, 0.28, [(l, {"bold": True})], size=10)
+    text(s, x + 0.17, y + 0.79, 2.75, 0.28, [b], size=8.5, color=MUTED)
+footer(s, 13)
 
 # ---------- 13. Future ----------
 s = S[12]; set_title(s, "Additional details / future development")
@@ -384,20 +418,24 @@ fut = [("Next 90 days · pilot", "Run on one OEM’s real dealer claims and buil
 for i, (t, b, col) in enumerate(fut):
     x = 0.33 + (i % 3) * 3.13; y = 1.42 + (i // 3) * 1.85
     card(s, x, y, 3.0, 1.7, t, b, accent=col, title_size=11, body_size=9.5)
-footer(s, 12)
+footer(s, 14)
 
-# ---------- 14. Links ----------
+# ---------- 15. Links ----------
 s = S[13]; set_title(s, "Links")
-text(s, 0.33, 1.4, 9.33, 3.6, [
-    ("GitHub public repository", {"bold": True, "color": INK, "size": 13}),
-    ("[add the repository link]", {"color": BLUE}),
-    ("Demo video (3–4 minutes)", {"bold": True, "color": INK, "size": 13}),
-    ("[add the YouTube / Drive link]", {"color": BLUE}),
-    ("Final product (deployed on Cloud Run)", {"bold": True, "color": INK, "size": 13}),
-    (LINK, {"color": BLUE}),
-    ("Tick “I’m a judge” on the login page: one demo account, five roles, a guided six-step tour. Watch view: /watch (or /w full screen).", {"color": MUTED, "size": 10}),
-], size=11)
-footer(s, 13)
+rows = [("GitHub public repository", GITHUB, "Source for the agents, web app, data scripts and video", INK),
+        ("Demo video (3–4 minutes)", VIDEO or "[video link]", "Narrated walkthrough of the live prototype", RED),
+        ("Final product (deployed on Cloud Run)", LINK, "Tick “I’m a judge” on the login page: one demo account, five roles, a guided six-step tour", BLUE),
+        ("Watch view", LINK + "/watch", "Apple Watch and Wear OS screens (open /w for full screen)", GREEN)]
+for i, (t, url, note, col) in enumerate(rows):
+    y = 1.42 + i * 0.93
+    box(s, 0.33, y, 9.33, 0.8, fill="FFFFFF", accent=None)
+    bar = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.33), Inches(y + 0.12), Inches(0.07), Inches(0.56))
+    bar.fill.solid(); bar.fill.fore_color.rgb = rgb(col); bar.line.fill.background()
+    text(s, 0.55, y + 0.08, 4.2, 0.3, [(t, {"bold": True})], size=12)
+    text(s, 0.55, y + 0.42, 4.3, 0.35, [note], size=8.5, color=MUTED)
+    tb = s.shapes.add_textbox(Inches(4.9), Inches(y + 0.2), Inches(4.7), Inches(0.4)); tb.text_frame.word_wrap = True
+    link(tb.text_frame, url, url if url.startswith("http") else LINK, size=11, first=True)
+footer(s, 15)
 
 # ---------- remove the template's instruction slide and the empty extra slide ----------
 for sl in (S[1], S[14]):
