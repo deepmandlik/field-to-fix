@@ -220,6 +220,25 @@ class Completeness(BaseModel):
     gaps: list[str]
 
 
+SUPPLIER_DRAFT = """You are the quality manager at the Tier-1 supplier named in the input. Write your company's 8D response
+(D4–D7) to the OEM for THIS case only. Stay consistent with the OEM's evidence: name the actual part and the suspect
+batches, confirm a root cause in line with the top hypothesis, and cite the PFMEA (R-..) and control-plan (CP-..) row
+ids given in the input. Use concrete, plausible plant data (dates after 2026-10-17, quantities, test results).
+1-3 sentences per section. Plain engineering English."""
+
+
+@app.post("/cases/{case_id}/supplier-draft", response_model=SupplierResponseIn)
+def supplier_draft(case_id: str, user: User = Depends(require("supplier"))):
+    """A case-specific example reply for the supplier form (demo helper; the supplier edits it before sending)."""
+    case = _visible_case(case_id, user)
+    t = case.get("trace") or {}
+    facts = {"supplier": case.get("supplier_name"), "part": {k: t.get(k) for k in ("part_no", "part_name")},
+             "suspect_batches": t.get("suspect_batches"), "plants": t.get("plants"), "build_weeks": t.get("build_weeks"),
+             "hypotheses": (case.get("hypotheses") or [])[:2], "pfmea": case.get("pfmea"), "control_plan": case.get("control_plan"),
+             "oem_8d": {k: (case.get("eight_d") or {}).get(k, {}).get("text") for k in ("D2", "D3", "D4", "D5")}}
+    return gemini.structured(settings.model_fast, SUPPLIER_DRAFT, [json.dumps(facts, default=str)], SupplierResponseIn)
+
+
 @app.post("/cases/{case_id}/supplier-response")
 def supplier_response(case_id: str, body: SupplierResponseIn, user: User = Depends(require("supplier"))):
     case = _visible_case(case_id, user)
@@ -228,7 +247,8 @@ def supplier_response(case_id: str, body: SupplierResponseIn, user: User = Depen
     check = gemini.structured(
         settings.model_fast,
         "You check a supplier's 8D response for completeness against the OEM's problem description and evidence. "
-        "List concrete gaps (e.g. a suspect batch not addressed, no verification data, no PFMEA update). Be brief.",
+        "List concrete gaps (e.g. a suspect batch not addressed, no verification data, no PFMEA update). Be brief. "
+        "The supplier answers D4-D7 only: do not flag D0-D3 or D8 as missing.",
         [json.dumps({"oem_8d": case.get("eight_d"), "trace": case.get("trace"), "supplier_response": body.model_dump()}, default=str)],
         Completeness,
     )

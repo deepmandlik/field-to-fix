@@ -95,10 +95,19 @@ export default function SupplierPortal() {
 
 function Respond({ c }: { c: any }) {
   const [f, setF] = useState({ D4_root_cause: "", D5_corrective_action: "", D6_implementation: "", D7_prevention: "" });
-  const [state, setState] = useState<{ busy?: boolean; err?: string; result?: any }>({});
+  const [state, setState] = useState<{ busy?: boolean; drafting?: boolean; err?: string; result?: any }>({});
   const e8 = c.eight_d ?? {};
   const t = c.trace ?? {};
   const canRespond = c.status === "sent_to_supplier";
+  // The Kaveri clamp case keeps its scripted reply (the demo story: the supplier blames torque, Gemini flags the gaps).
+  // Every other case gets a reply drafted by Gemini from that case's own part, batches, root cause and PFMEA rows.
+  const scripted = c.supplier_id === "S-KAV" && t.part_no === "P-1001";
+  async function fillExample() {
+    if (scripted) return setF(example);
+    setState({ drafting: true });
+    try { setF(await api(`/cases/${c.id}/supplier-draft`, { method: "POST", json: {} })); setState({}); }
+    catch (err: any) { setState({ err: err.message }); }
+  }
   const example = {
     D4_root_cause: "Confirmed: Station 6 torque tool on Line 2 was 3 weeks past calibration and had drifted to 3.6 Nm (spec 4.5 ±0.3). Batches KAV-26W31/W32 built in that window.",
     D5_corrective_action: "Recalibrated the tool; added a torque-angle monitored DC nutrunner with OK/NOK interlock at Station 6.",
@@ -129,7 +138,8 @@ function Respond({ c }: { c: any }) {
       {canRespond ? (
         <form onSubmit={submit} className="stack">
           <div className="row"><span className="label grow">Your 8D response</span>
-            <button type="button" className="btn text sm" onClick={() => setF(example)}>Fill an example response</button></div>
+            <button type="button" className="btn text sm" disabled={state.drafting} onClick={fillExample}>
+              {state.drafting ? <><span className="spin" /> Drafting for this case…</> : "Fill an example response"}</button></div>
           {field("D4_root_cause", "D4 · Confirmed root cause", "What you found at your plant, with data")}
           {field("D5_corrective_action", "D5 · Permanent corrective action", "The fix that removes the cause")}
           {field("D6_implementation", "D6 · Implementation and validation", "When, and the proof it works")}
