@@ -61,7 +61,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <div className="nav-group">
           <div className="nav-title">Data</div>
           <div className="nav-item" style={{ cursor: "default" }}><span className="ico" aria-hidden="true">▤</span>BigQuery · {summary?.claims ?? "…"} claims</div>
-          <div className="nav-item" style={{ cursor: "default" }}><span className="ico" aria-hidden="true">✦</span>Gemini 2.5 · Vertex AI</div>
+          <div className="nav-item" style={{ cursor: "default" }}><span className="ico" aria-hidden="true">✦</span>Gemini + ADK · Vertex AI</div>
         </div>
         <div className="side-foot">
           <div className="plan-chip card" style={{ boxShadow: "none", background: "var(--surface-2)" }}>

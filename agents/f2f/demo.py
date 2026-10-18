@@ -50,7 +50,7 @@ def replay(case_id: str) -> None:
     d = fs.db().collection("meta").document(f"snap-{case_id}").get().to_dict()
     events = [e for e in d.pop("events", []) if e.get("agent") in ("trace", "hypothesise", "draft_8d")]
     fs.update_case(case_id, {"status": "investigating", "replay_available": False})
-    fs.event(case_id, "replay", "Quick-reset mode: replaying the recorded agent investigation (Full reset runs Gemini live)", 0)
+    fs.event(case_id, "replay", "Replaying a recorded live run of the agents (no Gemini calls). Choose Investigate live for a fresh run.", 0)
     for e in events:
         time.sleep(1.8 if e.get("status") == "running" else 1.2)
         fs.event(case_id, e["agent"], e["message"], e.get("pct"), e.get("status", "done"))

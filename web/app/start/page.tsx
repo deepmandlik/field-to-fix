@@ -9,11 +9,11 @@ import { DEMO_CASE, inr, storyProgress, useCases, useSummary } from "@/lib/data"
 import { PERSONAS, persona, useSession } from "@/lib/session";
 
 const AGENTS = [
-  { n: "Intake", m: "Gemini 2.5 Flash", d: "Reads the note, photo and voice in any language; extracts component, failure, condition, severity." },
+  { n: "Intake", m: "Gemini 3.8 Flash", d: "Reads the note, photo and voice in any language; extracts component, failure, condition, severity." },
   { n: "Signal", m: "Gemini embeddings + HDBSCAN", d: "Groups claims by meaning and flags clusters growing faster than their baseline." },
   { n: "Trace", m: "BigQuery tools", d: "Joins failing VINs to plant, part, supplier and batch; computes each batch's lift over the fleet." },
-  { n: "Hypothesise", m: "Gemini 2.5 Pro", d: "Checks the cluster against the PFMEA and control plan; ranks root causes with citations." },
-  { n: "Draft 8D", m: "Gemini 2.5 Pro", d: "Writes D2–D5 with containment quantities from the stock table. A person approves." },
+  { n: "Hypothesise", m: "Gemini 4 Argon", d: "Checks the cluster against the PFMEA and control plan; ranks root causes with citations." },
+  { n: "Draft 8D", m: "Gemini 4 Argon", d: "Writes D2–D5 with containment quantities from the stock table. A person approves." },
 ];
 
 export default function Start() {

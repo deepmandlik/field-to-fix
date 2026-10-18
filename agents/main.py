@@ -143,13 +143,22 @@ def case_claims(case_id: str, limit: int = 500, user: User = Depends(current_use
     return bq.get_claims(case["claim_ids"][:limit])
 
 
+class InvestigateIn(BaseModel):
+    mode: str = "auto"  # "live" runs the agents on Gemini; "replay" replays the recorded live run; "auto" = replay if recorded
+
+
 @app.post("/cases/{case_id}/investigate")
-def start_investigation(case_id: str, bg: BackgroundTasks, user: User = Depends(require("analyst"))):
+def start_investigation(case_id: str, bg: BackgroundTasks, body: InvestigateIn | None = None,
+                        user: User = Depends(require("analyst"))):
     case = _visible_case(case_id, user)
     if case["status"] not in ("detected", "investigating"):
         raise HTTPException(409, f"Case is already {case['status']}")
     fs.append_approval(case_id, user.uid, user.role, "investigate", None)
-    bg.add_task(demo.replay if case.get("replay_available") else _safe_investigate, case_id)
+    mode = (body.mode if body else "auto")
+    use_replay = mode == "replay" or (mode == "auto" and case.get("replay_available"))
+    if use_replay and not case.get("replay_available"):
+        raise HTTPException(409, "No recorded run to replay for this case")
+    bg.add_task(demo.replay if use_replay else _safe_investigate, case_id)
     return {"started": True}
 
 

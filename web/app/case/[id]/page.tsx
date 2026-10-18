@@ -77,7 +77,10 @@ function CasePage() {
         </div>
         <div className="row wrap">
           {role === "analyst" && c.status === "detected" && <>
-            <button className="btn" disabled={busy} onClick={() => act(`/cases/${id}/investigate`)}><ISpark size={18} />Investigate with agents</button>
+            <button className="btn" disabled={busy} onClick={() => act(`/cases/${id}/investigate`, { mode: "live" })}
+              title="Five Gemini agents, orchestrated by Google ADK, run live on this case (about a minute)"><ISpark size={18} />Investigate live · ~1 min</button>
+            {c.replay_available && <button className="btn outline" disabled={busy} onClick={() => act(`/cases/${id}/investigate`, { mode: "replay" })}
+              title="Replays a recorded live run in 15 seconds, with no Gemini calls">Quick replay · 15 s</button>}
             <button className="btn outline" disabled={busy} onClick={() => act(`/cases/${id}/action`, { action: "dismiss", note: "Not a real pattern" })}>Dismiss</button>
           </>}
           {running && <span className="chip blue"><span className="spin" /> Agents working</span>}
@@ -119,10 +122,42 @@ function CasePage() {
   );
 }
 
+const inr = (v: number) => v >= 1e7 ? `₹${(v / 1e7).toFixed(1)} Cr` : v >= 1e5 ? `₹${(v / 1e5).toFixed(1)} L` : `₹${Math.round(v / 1000)}k`;
+
+// What waiting costs, from this case's own claims: today's claim rate × average claim cost, plus the at-risk
+// vehicles failing at the rate the suspect batches already show. Compared with the usual ~19-week cycle.
+function CostOfWaiting({ c, claims, atRisk }: { c: any; claims: any[]; atRisk: number }) {
+  const costs = claims.map((x) => x.cost_inr).filter((v) => v > 0);
+  if (!costs.length) return null;
+  const avg = costs.reduce((a, b) => a + b, 0) / costs.length;
+  const perDay = ((c.recent_count ?? 0) / 21) * avg;
+  const sus = (c.trace?.batches ?? []).filter((b: any) => c.trace.suspect_batches.includes(b.batch_id));
+  const fleet = sus.reduce((n: number, b: any) => n + (b.fleet_vins || 0), 0);
+  const failRate = fleet ? sus.reduce((n: number, b: any) => n + b.failing_vins, 0) / fleet : 0;
+  const exposure = atRisk * failRate * avg;
+  const avoided = perDay * 19 * 7 + exposure;
+  return (
+    <div className="card card-pad stack cow">
+      <div className="row wrap"><h3 className="grow">Cost of waiting</h3>
+        <span className="faint small">estimated from this case’s {costs.length} claims · avg claim {inr(avg)}</span></div>
+      <div className="grid g3 eq">
+        <div className="cow-k"><span className="label">Every day this stays open</span><span className="v num">{inr(perDay)}</span>
+          <span className="d">{((c.recent_count ?? 0) / 21).toFixed(1)} new claims a day × avg claim cost</span></div>
+        <div className="cow-k"><span className="label">If the at-risk cars fail too</span><span className="v num">{c.trace ? inr(exposure) : "—"}</span>
+          <span className="d">{c.trace ? `${atRisk} cars × ${(failRate * 100).toFixed(1)}% failure rate seen in the suspect batches` : "known after Trace"}</span></div>
+        <div className="cow-k hot"><span className="label">Avoided by acting today</span><span className="v num">{inr(avoided)}</span>
+          <span className="d">vs the usual ~19 weeks from first claims to a supplier fix</span></div>
+      </div>
+    </div>
+  );
+}
+
 function AgentLog({ events, running }: { events: any[]; running: boolean }) {
   return (
     <div className="card card-pad stack" style={running ? { boxShadow: "0 0 0 2px var(--primary), var(--shadow)" } : undefined}>
-      <div className="row"><h3 className="grow">Agent log</h3>{running && <span className="chip blue"><span className="spin" />live</span>}</div>
+      <div className="row"><h3 className="grow">Agent log</h3>
+        {events.some((e) => e.agent === "adk") && <span className="chip">Google ADK · SequentialAgent</span>}
+        {events.some((e) => e.agent === "replay") ? <span className="chip amber">recorded run</span> : running && <span className="chip blue"><span className="spin" />live</span>}</div>
       <div className="agentlog" aria-live="polite">
         {events.slice(-7).map((e, i, arr) => {
           const st = e.status === "running" && !(running && i === arr.length - 1) ? "done" : e.status;
@@ -174,6 +209,7 @@ function Overview({ c, claims }: { c: any; claims: any[] }) {
         <Stat label="Vehicles at risk, no claims yet" value={t ? atRisk.toLocaleString() : "—"} sub={t ? t.other_models_at_risk.map((m: any) => m.model).join(", ") || "none" : "after trace"} hot={atRisk > 0} />
         <Stat label="Suspect parts to contain" value={t ? stock.toLocaleString() : "—"} sub={t ? `in ${t.stock.length} locations` : "after trace"} />
       </div>
+      <CostOfWaiting c={c} claims={claims} atRisk={atRisk} />
       <div className="grid g-2-1">
         <div className="card card-pad stack"><div className="row"><h3 className="grow">Claims per week</h3><span className="faint small">red = last 3 weeks</span></div>
           <Columns data={weeks} hotFrom={weeks.length - 3} height={220} /></div>

@@ -422,3 +422,10 @@ table.doc-t th { background: var(--surface-2); font-weight: 500; }
 .wa-body > * { flex-shrink: 0; }
 @media (max-width: 640px) { .photo-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } .photo-opt > span { font-size: 10px; padding: 12px 4px 4px; } }
 .next-action .grow { min-width: 200px; flex-basis: 220px; } @media (max-width: 640px) { .next-action .btn { width: 100%; } }
+
+/* Cost of waiting: impact in money, per case */
+.cow-k { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 12px; background: var(--surface-2); min-width: 0; }
+.cow-k .v { font-size: 26px; line-height: 1.1; font-weight: 500; }
+.cow-k .d { font-size: 12.5px; color: var(--muted); }
+.cow-k.hot { background: var(--green-soft); }
+.cow-k.hot .v, .cow-k.hot .label { color: var(--green); }

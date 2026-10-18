@@ -54,7 +54,7 @@ def recent_claims_with_embeddings(days: int = 120) -> list[dict]:
 def get_claims(claim_ids: list[str]) -> list[dict]:
     return _q(
         f"""
-        SELECT r.claim_id, r.vin, r.dealer_id, d.city, r.claim_date, r.mileage_km, r.note_text,
+        SELECT r.claim_id, r.vin, r.dealer_id, d.city, r.claim_date, r.mileage_km, r.cost_inr, r.note_text,
                r.photo_uri, s.lang, s.translated_text, s.component, s.failure_mode,
                s.condition, s.severity, s.photo_findings, s.confidence
         FROM {settings.table('claims_raw')} r

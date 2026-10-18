@@ -25,7 +25,7 @@ export function useActAs() {
 
 export const STORY: { role: Role; title: string; body: string; href: string }[] = [
   { role: "dealer", title: "File a new warranty claim", body: "Write the repair note in Hindi. Watch AI read it and link it to an open case in seconds.", href: "/claim" },
-  { role: "analyst", title: "Investigate the cluster", body: "Open the coolant-leak case and run the agents: trace, root cause, 8D draft.", href: `/case/${DEMO_CASE}` },
+  { role: "analyst", title: "Investigate the cluster", body: "Open the coolant-leak case and click Investigate live: five Gemini agents, run by Google ADK, trace it and draft the 8D in about a minute. Short on time? Use Quick replay (15 s).", href: `/case/${DEMO_CASE}` },
   { role: "sqe", title: "Approve the 8D", body: "Review the AI-drafted 8D, edit it, approve and send it to the supplier.", href: `/case/${DEMO_CASE}?tab=8d` },
   { role: "supplier", title: "Respond to the 8D", body: "As Kaveri Hoses, confirm the root cause. AI checks the response for gaps.", href: "/supplier" },
   { role: "sqe", title: "Review the response", body: "AI flags gaps in the supplier's answer. Send it back, or accept to close with a full audit trail.", href: `/case/${DEMO_CASE}?tab=8d` },
@@ -78,9 +78,9 @@ export function DemoGuide() {
           })}
           <div className="row wrap" style={{ borderTop: "1px solid var(--line)", paddingTop: 10, marginTop: 4 }}>
             <span className="small faint grow">Replay the story</span>
-            <button className="btn text sm" disabled={!!busy} onClick={() => reset("analysed")} title="Cases go back to Detected; Investigate replays the recorded agent run in about 15 seconds">
+            <button className="btn text sm" disabled={!!busy} onClick={() => reset("analysed")} title="Cases go back to Detected. Investigate live runs Gemini (~1 min); Quick replay shows the recorded run in 15 s">
               <IReset size={16} />{busy === "analysed" ? "Resetting…" : "Quick reset"}</button>
-            <button className="btn text sm" disabled={!!busy} onClick={() => reset("fresh")} title="Cases go back to Detected; Investigate calls Gemini live (about 1–2 minutes)">
+            <button className="btn text sm" disabled={!!busy} onClick={() => reset("fresh")} title="Cases go back to Detected with no recorded run: Investigate always calls Gemini live (~1 min)">
               {busy === "fresh" ? "Resetting…" : "Full reset"}</button>
           </div>
         </div>
