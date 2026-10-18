@@ -61,13 +61,15 @@ def txt(x, y, s, size, color=INK, weight=400, anchor="start", extra=""):
     return f'<text x="{x:.1f}" y="{y:.1f}" font-size="{size}" font-weight="{weight}" fill="{color}" text-anchor="{anchor}" {extra}>{s}</text>'
 
 
-def chip(cx, base_y, w, h, d, color, title, sub=None, ink=None):
-    """A standing 3D tile whose front face carries a label. (cx, base_y) = front-bottom-left on screen."""
-    ink = ink or ("#202124" if color in (YELLOW,) or color.startswith("#F") and color not in (RED, ORANGE) else "#FFFFFF")
-    out = box(0, 0, 0, w, d, h, color, ox=cx, oy=base_y)
+def chip(cx, base_y, w, h, d, color, title, sub=None):
+    """A standing 3D tile whose front face carries a label. (cx, base_y) = front-bottom-left on screen.
+    Tiles take their layer's colour as a soft tint, so colour only ever signals which layer a tile belongs to."""
+    out = box(0, 0, 0, w, d, h, color, top=mix(color, "#FFFFFF", 0.55), right=mix(color, "#FFFFFF", 0.4), front=mix(color, "#FFFFFF", 0.9), ox=cx, oy=base_y)
+    out = out.replace(f'stroke="{mix(color, "#000000", 0.12)}"', f'stroke="{mix(color, "#FFFFFF", 0.35)}"')
+    ink = mix(color, "#000000", 0.45)
     if sub:
         out += txt(cx + w / 2, base_y - h + h * 0.44, title, 25, ink, 700, "middle")
-        out += txt(cx + w / 2, base_y - h + h * 0.78, sub, 19, ink, 400, "middle", 'fill-opacity="0.92"')
+        out += txt(cx + w / 2, base_y - h + h * 0.78, sub, 19, MUTED, 400, "middle")
     else:
         out += txt(cx + w / 2, base_y - h / 2 + 9, title, 25, ink, 700, "middle")
     return out
@@ -87,9 +89,9 @@ def tier_stack(tiers, W, H, x0, x1, base0, pitch, D=150, T=22, chip_h=70, chip_d
         gap = 16
         cw = (w - 40 - gap * (n - 1)) / n
         cy = oy - T - 14 * DY  # chips stand 14 units back from the slab's front edge
-        for j, (ct, cs, cc) in enumerate(t["chips"]):
+        for j, (ct, cs, _) in enumerate(t["chips"]):
             cx = x0 + 20 + 14 * DX + j * (cw + gap)
-            parts.append(chip(cx, cy, cw, chip_h, chip_d, cc, ct, cs))
+            parts.append(chip(cx, cy, cw, chip_h, chip_d, t["color"], ct, cs))
         # tier label on the left, centred on the slab
         ly = oy - T / 2 - chip_h / 2 + 4
         parts.append(f'<rect x="8" y="{ly - 34:.1f}" width="8" height="64" rx="4" fill="{t["color"]}"/>')
@@ -167,15 +169,15 @@ feat = tier_stack([
 render("features3d", feat, W, H)
 
 # ---------------- opportunities: three rising 3D blocks ----------------
-W, H = 1866, 330
+W, H = 1866, 250
 parts = []
-specs = [("1", "How is it different?", BLUE, 80), ("2", "How does it solve it?", ORANGE, 130), ("3", "What is the USP?", GREEN, 180)]
+specs = [("1", "How is it different?", BLUE, 110), ("2", "How does it solve it?", BLUE, 110), ("3", "What is the USP?", BLUE, 110)]
 for i, (n, label, col, h) in enumerate(specs):
     x0 = 60 + i * 620
-    parts.append(shadow(0, 0, 470, 120, x0, 300))
-    parts.append(box(0, 0, 0, 470, 120, h, col, ox=x0, oy=300))
-    parts.append(txt(x0 + 30, 300 - h / 2 + 22, n, 64, "#FFFFFF" if col != YELLOW else INK, 800))
-    parts.append(txt(x0 + 90, 300 - h / 2 + 12, label, 34, "#FFFFFF", 700))
+    parts.append(shadow(0, 0, 470, 120, x0, 225))
+    parts.append(box(0, 0, 0, 470, 120, h, col, ox=x0, oy=225))
+    parts.append(txt(x0 + 30, 225 - h / 2 + 22, n, 64, "#FFFFFF" if col != YELLOW else INK, 800))
+    parts.append(txt(x0 + 90, 225 - h / 2 + 12, label, 34, "#FFFFFF", 700))
 render("opps3d", svg(W, H, "".join(parts)), W, H)
 
 

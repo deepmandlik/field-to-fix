@@ -23,15 +23,11 @@ export const Karaoke: React.FC<{ text: string; voSeconds: number; dark?: boolean
   const chunk = chunks.find((c) => c.includes(active)) ?? chunks[0];
   const ink = dark ? "#FFFFFF" : C.ink;
   const dim = dark ? "rgba(255,255,255,0.72)" : "#5F6368";
-  const GOOGLE = ["#4285F4", "#EA4335", "#FBBC05", "#34A853"];
-  const hiBg = GOOGLE[active % 4];
-  const hiInk = active % 4 === 2 ? "#202124" : "#FFFFFF"; // dark text on yellow for contrast
   return (
     <div style={{ position: "absolute", left: 60, right: 60, bottom: 30, display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "4px 12px", fontFamily,
       fontSize: 40, fontWeight: 500, textShadow: dark ? "0 2px 10px rgba(0,0,0,.65)" : "0 1px 0 rgba(255,255,255,.9)" }}>
       {chunk.map((i) => (
-        <span key={i} style={{ color: i === active ? hiInk : i < active ? ink : dim, background: i === active ? hiBg : "transparent",
-          padding: "2px 10px", borderRadius: 10, transition: "none", textShadow: i === active ? "none" : undefined }}>{words[i]}</span>
+        <span key={i} style={{ color: i <= active ? ink : dim, padding: "2px 10px" }}>{words[i]}</span>
       ))}
     </div>
   );
