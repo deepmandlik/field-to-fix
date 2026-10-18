@@ -1,0 +1,19 @@
+[
+  {"id": "open", "text": "In a workshop in Pune, a hose clamp cracks. The technician fixes the leak, and types a quick note, in Hindi."},
+  {"id": "problem", "text": "That note joins thousands of warranty claims, in many languages. Car makers take about seven weeks to find the root cause, and another nine to fix it at the supplier. Meanwhile, faulty parts keep shipping. Warranty costs the industry fifty-eight billion dollars a year."},
+  {"id": "title", "text": "Meet Field-to-Fix. Dealers file it. Car makers approve it. Suppliers solve it."},
+  {"id": "people", "text": "Five people touch every failure. Field-to-Fix connects them on one live case, with five Gemini agents on Google Cloud doing the investigation in between."},
+  {"id": "login", "text": "Let's see it working. This is the live prototype on Cloud Run. Judges tick one box, and sign in with Firebase: one account, five roles, and a guided tour."},
+  {"id": "claim", "text": "Ravi, the dealer technician, picks a Hindi note, and adds a photo of the clamp. As he submits, Gemini reads the note, and studies the photo. It spots the crack, turns the claim into a vector, and compares it with every open case. In a few seconds, it is linked to the coolant-leak case, and the analyst is notified."},
+  {"id": "investigate", "text": "Ananya, the warranty analyst, opens that case and clicks Investigate. Watch the agent log. Trace follows the failing cars to two clamp batches from one supplier, and finds three hundred and seven cars of another model, fitted with the same batch. Hypothesise checks the factory's failure analysis, and Draft writes a cited eight-D report. It all streams live, from Firestore."},
+  {"id": "ask", "text": "She can also ask questions. Gemini answers only from the case data, and cites its sources."},
+  {"id": "eightd", "text": "Kenji, in supplier quality, reviews the eight-D report. The parts to quarantine come from BigQuery, not from the model."},
+  {"id": "watchapprove", "text": "And when Kenji is at lunch, his watch tells him the report is ready. One firm hold approves it, so a stray tap never can."},
+  {"id": "supplier", "text": "Suresh, at the supplier, sees only his own cases, with the full evidence. He replies that a torque tool drifted. Gemini checks his answer against the evidence, and flags four gaps."},
+  {"id": "sendback", "text": "So Kenji sends it back, with one click. Every agent step and every decision is kept in the case's activity tree."},
+  {"id": "dictate", "text": "On the shop floor, with gloves on, a technician can simply dictate a claim on the watch. It is read, linked, and the analyst is notified."},
+  {"id": "overview", "text": "Meera, the head of quality, sees cost, open cases, and risk across the whole network, on any screen."},
+  {"id": "architecture", "text": "It all runs on Google Cloud: Cloud Run, Firebase, Firestore, BigQuery, Cloud Storage, and Gemini on Vertex AI."},
+  {"id": "impact", "text": "From about nineteen weeks, to the same day."},
+  {"id": "close", "text": "Field-to-Fix. So you never have to hear the words, failed to fix."}
+]

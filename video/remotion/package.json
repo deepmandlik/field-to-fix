@@ -1,0 +1,13 @@
+{
+  "name": "f2f-video",
+  "private": true,
+  "scripts": { "render": "remotion render src/index.ts F2F out/field-to-fix.mp4" },
+  "dependencies": {
+    "@remotion/cli": "4.0.200",
+    "@remotion/google-fonts": "4.0.200",
+    "remotion": "4.0.200",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": { "typescript": "5.4.5", "@types/react": "18.3.3" }
+}
