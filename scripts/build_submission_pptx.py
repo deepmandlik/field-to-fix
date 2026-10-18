@@ -286,10 +286,10 @@ for i, (n, d, col) in enumerate(people):
     text(s, x + 0.08, 1.98, pw - 0.16, 0.45, [d], size=9, color=MUTED, align=PP_ALIGN.CENTER)
     if i < 4:
         arrow(s, x + pw + 0.02, 2.02, x + pw + 0.18, 2.02)
-agents = [("1 Intake", "Gemini 2.5 Flash"), ("2 Signal", "Embeddings + clustering"), ("3 Trace", "BigQuery tools"),
-          ("4 Hypothesise", "Gemini 2.5 Pro + PFMEA"), ("5 Draft 8D", "Gemini 2.5 Pro")]
+agents = [("1 Intake", "Gemini 3.8 Flash"), ("2 Signal", "Embeddings + clustering"), ("3 Trace", "BigQuery tools"),
+          ("4 Hypothesise", "Gemini 4 Argon + PFMEA"), ("5 Draft 8D", "Gemini 4 Argon")]
 box(s, 0.33, 2.75, 9.33, 1.25, fill="FEF7E0", line="F6D58A", radius=True)
-text(s, 0.45, 2.8, 4, 0.3, [("Gemini agents on Google Cloud", {"bold": True, "color": "8C5000"})], size=10)
+text(s, 0.45, 2.8, 6, 0.3, [("Gemini agents on Google Cloud · orchestrated by Google ADK", {"bold": True, "color": "8C5000"})], size=10)
 for i, (n, d) in enumerate(agents):
     x = 0.5 + i * 1.84
     box(s, x, 3.12, 1.62, 0.75, accent=AMBER)
@@ -323,14 +323,14 @@ footer(s, 8)
 # ---------- 9. Technologies ----------
 s = S[8]; set_title(s, "Technologies used in the solution")
 groups = [
-    ("Gemini on Vertex AI", BLUE, [("Gemini 2.5 Flash", "Intake (text, photo, voice), Ask, gap check"), ("Gemini 2.5 Pro", "Root causes vs PFMEA, 8D drafting"),
-                                    ("gemini-embedding-001", "Clustering (HDBSCAN), live linking"), ("Gemini 2.5 Flash Image", "Demo photos and deck art")]),
+    ("Gemini on Vertex AI", BLUE, [("Gemini 3.8 Flash", "Intake (text, photo, voice), Ask, gap check"), ("Gemini 4 Argon", "Root causes vs PFMEA, 8D drafting"),
+                                    ("gemini-embedding-001", "Clustering (HDBSCAN), live linking"), ("Google ADK", "SequentialAgent investigation, LlmAgent Ask")]),
     ("Cloud Run + Firebase", ORANGE, [("Cloud Run", "Next.js web app + FastAPI agent API"), ("Firebase Authentication", "Five roles via custom claims + judge"),
                                       ("Firestore", "Live cases, agent log, 8D, chat"), ("Security rules", "Suppliers see only their cases")]),
     ("Data + events", GREEN, [("BigQuery", "Claims, vehicles, batches, stock, PFMEA"), ("Cloud Storage", "Claim photos and voice notes"),
                               ("Pub/Sub", "Asynchronous claim intake"), ("Cloud Scheduler", "Hourly signal scan")]),
     ("App + media", PURPLE, [("Next.js 14 · React · TS", "Responsive web, phone, watch views"), ("Python 3.11 · FastAPI", "Agents, tools, 8D PDF (reportlab)"),
-                             ("Cloud Text-to-Speech", "Chirp 3 HD video narration"), ("Remotion", "Motion-design demo video")]),
+                             ("Cloud Text-to-Speech", "Chirp 3 HD video narration"), ("Demo media", "Gemini Flash Image, Remotion video")]),
 ]
 gw = 2.24
 for i, (g, col, items) in enumerate(groups):
@@ -351,9 +351,9 @@ footer(s, 9)
 # ---------- 10. Estimated cost ----------
 s = S[9]; set_title(s, "Estimated implementation cost", "Pilot: one OEM, 10,000 claims and ~50 investigations a month · Singapore region · approx. Google Cloud list prices (USD)")
 items = [("Cloud Run · agent API", "1 always-on instance, 2 vCPU / 2 GiB", 140),
-         ("Gemini 2.5 Flash", "10k claims, ~1.5k in / ~1k out incl. thinking", 30),
+         ("Gemini 3.8 Flash", "10k claims, ~1.5k in / ~1k out incl. thinking", 100),
          ("BigQuery, Firestore, Storage, Pub/Sub", "small volumes, mostly free tier", 10),
-         ("Gemini 2.5 Pro", "50 investigations, ~30k in / ~10k out", 7),
+         ("Gemini 4 Argon", "50 investigations, ~30k in / ~10k out", 16),
          ("Cloud Run · web app", "scales to zero", 5),
          ("Build, registry, logging", "Cloud Build, Artifact Registry, Logging", 5),
          ("Embeddings", "10k claims + searches", 1)]
@@ -373,9 +373,9 @@ for i, (name, note, v) in enumerate(items):
     if i < len(items) - 1:
         ln = s.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(0.5), Inches(y + 0.44), Inches(6.45), Inches(y + 0.44))
         ln.line.color.rgb = rgb("F1F3F4"); ln.line.width = Pt(0.75)
-cards = (("≈ $200", "per month for the whole pilot", "Gemini thinking tokens included"),
-         ("≈ 2¢", "per warranty claim handled", "$200 ÷ 10,000 claims a month"),
-         ("+ ≈ $3", "per extra 1,000 claims", "Gemini grows with claims; compute stays flat"))
+cards = (("≈ $280", "per month for the whole pilot", "list prices; launch pricing halves Gemini until Dec"),
+         ("≈ 2.8¢", "per warranty claim handled", "$280 ÷ 10,000 claims a month"),
+         ("+ ≈ $10", "per extra 1,000 claims", "Gemini grows with claims; compute stays flat"))
 for i, (big, label, note) in enumerate(cards):
     y = 1.45 + i * 1.255
     box(s, 6.75, y, 2.91, 1.16, fill="FFFFFF", accent=GREEN)
@@ -390,8 +390,8 @@ SNAPS = [
      "Ravi writes a short note in Hindi and adds a photo. Gemini reads both, spots the cracked clamp, and links the claim "
      "to the open coolant-leak case in seconds. The analyst is notified."),
     ("Analyst · five agents investigate live", "full-07-agent-log-live.jpg",
-     "One click on Investigate. The agent log streams from Firestore as Trace finds two supplier batches and 307 cars at "
-     "risk, Hypothesise checks the PFMEA, and Draft writes the 8D."),
+     "One click on Investigate live. Google ADK runs Trace → Hypothesise → Draft 8D while the log streams from Firestore: "
+     "two supplier batches, 307 cars at risk, a cited 8D in about 90 seconds."),
     ("Analyst · root cause and Ask", "full-09-root-cause-ask.jpg",
      "Root causes ranked by confidence, each citing PFMEA rows, control-plan gaps and claims. Ask answers questions from "
      "the case data only, with sources."),
@@ -401,9 +401,9 @@ SNAPS = [
     ("Tier-1 supplier · reply checked by Gemini", "full-12-supplier-ai-check.jpg",
      "Suresh sees only his company’s cases. Gemini checks his reply against the OEM’s evidence and lists "
      "the gaps before the OEM accepts it."),
-    ("Head of quality · network overview", "full-14-overview.jpg",
-     "Meera sees claims, cost by category, open cases by stage and vehicles at risk across the whole network, on any "
-     "screen from monitor to phone."),
+    ("New · cost of waiting", "full-16-cost-of-waiting.jpg",
+     "Every case shows what delay costs, from its own claims: ₹13k a day while it stays open, and ₹19 L avoided by "
+     "acting today instead of the usual 19-week cycle."),
 ]
 for k, slide in enumerate([S[10]] + SNAPX):
     set_title(slide, f"Snapshots of the prototype ({k + 1}/3)")
@@ -417,14 +417,14 @@ for k, slide in enumerate([S[10]] + SNAPX):
 # ---------- 13. Performance ----------
 s = S[11]; set_title(s, "Prototype performance report / benchmarking", "Measured on the deployed prototype with our test dataset (6,400 vehicles, 630+ claims, 3 languages)")
 kpis = [("~6 s", "Claim → linked to its case", "vs the monthly warranty review", BLUE),
-        ("59 s", "Click → cited 8D draft", "vs ~7 weeks to the root cause", PURPLE),
+        ("~90 s", "Click → cited 8D draft", "live ADK run · vs ~7 weeks to the root cause", PURPLE),
         ("< 1 day", "First claims → 8D at supplier", "vs ~19 weeks incl. countermeasure", GREEN),
-        ("630 / 630", "Failure category correct", "real-world notes will be noisier", ORANGE),
-        ("162 / 162", "Hindi notes understood", "plus Bahasa and English", ORANGE),
+        ("99 / 100", "Messy notes classified right", "hard set: typos, Hinglish, slang, 2-word notes", ORANGE),
+        ("630 / 630", "Clean notes classified right", "162 Hindi, plus Bahasa and English", ORANGE),
         ("56 / 56", "Planted failure claims recalled", "near-duplicate clusters merged at 0.92", BLUE),
         ("2 / 2", "Bad supplier batches found", "KAV-26W31, W32 · lift 2.3× / 1.9×", TEAL),
         ("307", "Cars flagged before failure", "same batch, other model, 0 claims yet", RED),
-        ("4", "Gaps caught in supplier reply", "root-cause contradiction detected", AMBER)]
+        ("4", "Gaps caught in supplier reply", "in the recorded run; root-cause contradiction", AMBER)]
 for i, (v, l, b, col) in enumerate(kpis):
     x = 0.33 + (i % 3) * 3.13; y = 1.45 + (i // 3) * 1.24
     box(s, x, y, 3.0, 1.12, fill="FFFFFF")
@@ -440,7 +440,7 @@ s = S[12]; set_title(s, "Additional details / future development")
 fut = [("Next 90 days · pilot", "Run on one OEM’s real dealer claims and build data; measure root-cause time against their current process.", BLUE),
        ("Native wrist apps", "Wear OS (Compose + Tile) and watchOS (SwiftUI + complication) with push alerts via FCM/APNs; offline dictation queue.", RED),
        ("Across the supply chain", "Supplier sign-in for many OEMs, Tier-2 traceability, recall-risk alerts for at-risk vehicles.", GREEN),
-       ("Deeper agents", "Agent Development Kit orchestration, Gemini Live voice for technicians, image-based defect grading.", PURPLE),
+       ("Deeper agents", "Deploy the ADK agents to Vertex AI Agent Engine, Gemini Live voice for technicians, image-based defect grading.", PURPLE),
        ("Integrations", "Dealer management systems, MES / quality systems, SAP QM notifications, Google Workspace for 8D sign-off.", AMBER),
        ("Safety & scale", "Per-tenant data isolation, evaluation sets from real claims, human-review sampling, cost controls.", TEAL)]
 for i, (t, b, col) in enumerate(fut):

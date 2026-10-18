@@ -136,9 +136,9 @@ right = "".join([
 ])
 arch = tier_stack([
     {"name": "Data & AI", "sub": "Vertex AI · BigQuery", "color": YELLOW, "chips": [
-        ("Gemini 2.5", "Flash + Pro", BLUE), ("Embeddings", "gemini-embedding", PURPLE), ("BigQuery", "claims, batches", BLUE),
+        ("Gemini", "3.8 Flash + 4 Argon", BLUE), ("Embeddings", "gemini-embedding", PURPLE), ("BigQuery", "claims, batches", BLUE),
         ("Firestore", "live cases, log", ORANGE), ("Storage", "photos, voice", GREEN), ("Pub/Sub", "+ Scheduler", RED)]},
-    {"name": "Agents", "sub": "Cloud Run · FastAPI", "color": BLUE, "chips": [
+    {"name": "Agents", "sub": "Cloud Run · Google ADK", "color": BLUE, "chips": [
         ("Intake", "text, photo, voice", ORANGE), ("Signal", "clusters", BLUE), ("Trace", "batch + lift", TEAL),
         ("Hypothesise", "vs PFMEA", PURPLE), ("Draft 8D", "cited", GREEN), ("Ask + check", "grounded", RED)]},
     {"name": "Experience", "sub": "Cloud Run · Firebase", "color": GREEN, "chips": [
@@ -155,7 +155,7 @@ W, H = 1866, 770
 feat = tier_stack([
     {"name": "4 · Act", "sub": "people stay in charge", "color": GREEN, "chips": [
         ("Supplier portal + AI check", "Gemini flags gaps in replies", GREEN), ("Hold-to-approve on watch", "Apple Watch and Wear OS", RED),
-        ("Dashboards + audit tree", "every step, time-stamped", BLUE)]},
+        ("Cost of waiting", "₹ per day a case stays open", BLUE)]},
     {"name": "3 · Decide", "sub": "cited, never guessed", "color": PURPLE, "chips": [
         ("Cited root causes", "ranked against the PFMEA", PURPLE), ("AI-drafted 8D + PDF", "containment from BigQuery", GREEN),
         ("Ask Gemini", "grounded answers with sources", BLUE)]},

@@ -16,6 +16,25 @@ drafts the 8D corrective-action report for the supplier-quality engineer to appr
 | Demo video (3:14) | https://drive.google.com/file/d/13FqNQnWm67ml6OBLyBttgP9fU-pn3wZ5/view?usp=sharing |
 | Brief description | [submission/DESCRIPTION.md](submission/DESCRIPTION.md) |
 
+## Agents and models
+
+- Gemini 3.8 Flash (Intake, Ask, supplier gap check) and Gemini 4 Argon (root cause, 8D) on Vertex AI, set in
+  `agents/f2f/config.py` (`MODEL_FAST`, `MODEL_REASON`).
+- Orchestration uses the Google Agent Development Kit (`agents/f2f/adk_agents.py`): the investigation is a
+  `SequentialAgent` of Trace → Hypothesise → Draft 8D, and Ask is an `LlmAgent` with case tools. If ADK is not
+  installed or fails before a step runs, both fall back to the direct Gen AI SDK path. `USE_ADK=0` forces that path.
+
+## Hard intake test
+
+`agents/eval/hard_notes.py` holds 100 hand-written messy notes (typos, Hinglish, slang, two-word notes, mixed
+Bahasa/English). Run it from `agents/`:
+
+```bash
+python -m eval.run_hard_eval
+```
+
+Latest result: 99/100 with Gemini 3.8 Flash (`agents/eval/hard_results.json`).
+
 ## Architecture
 
 ```

@@ -6,43 +6,56 @@
 **Demo video:** https://drive.google.com/file/d/13FqNQnWm67ml6OBLyBttgP9fU-pn3wZ5/view?usp=sharing
 **Code:** https://github.com/deepmandlik/field-to-fix
 
-## What we built
+## The problem
 
-When a car part fails in the field, the dealer files a warranty claim, the car maker has to find the root cause, and
-the supplier has to fix it. Today that takes about 7 weeks to the root cause and 9–10 more to the fix, while faulty
-parts keep shipping. Field-to-Fix connects the dealer, the OEM and the Tier-1 supplier on one live case and uses five
-Gemini agents to do the investigation in between:
+When a car part fails in the field, a dealer technician fixes it and types a short note, often in Hindi, Bahasa or
+Hinglish. That note joins thousands of warranty claims. Car makers take about 7 weeks to confirm the root cause of one
+failure and another 9–10 weeks to fix it at the supplier, so faulty parts keep shipping for roughly 19 weeks. Warranty
+costs the auto industry about $58B a year, and the people who must act — dealer, OEM quality team and Tier-1
+supplier — work in separate systems.
 
-1. **Intake** reads each claim — a short note in any language (Hindi, Bahasa, English…), a photo, or a voice note — and
-   extracts the failed component, failure mode and severity. A new claim is linked to the matching open case in seconds.
+## Our solution
+
+Field-to-Fix puts the dealer, the OEM and the supplier on one live case, and five Gemini agents do the investigation
+in between:
+
+1. **Intake** reads each claim — a note in any language, a photo or a voice note — and extracts the failed part,
+   failure mode and severity. A new claim is linked to the matching open case in seconds.
 2. **Signal** groups claims by meaning and flags clusters growing faster than their baseline.
-3. **Trace** follows the failing vehicles to plant, part, supplier and production batch, and finds vehicles of other
-   models fitted with the same batch before they fail.
+3. **Trace** follows the failing cars to plant, part, supplier and production batch, and finds cars of other models
+   fitted with the same batch **before** they fail.
 4. **Hypothesise** checks the cluster against the factory’s PFMEA and control plan and ranks root causes, each cited.
 5. **Draft 8D** writes the 8D corrective-action report, with containment quantities taken from BigQuery.
 
 People stay in charge: the supplier-quality engineer edits and approves the 8D, the supplier answers it in its own
-portal, and Gemini checks that answer for gaps before the OEM accepts it. A watch view (Apple Watch / Wear OS) lets
-people get alerted, approve with a press-and-hold, and dictate claims when they are away from a screen.
+portal, and Gemini checks that answer for gaps before the OEM accepts it. A **Cost of waiting** panel shows, for every
+case, what each day of delay costs and what acting today avoids. A smartwatch view lets engineers approve with a
+press-and-hold and lets gloved technicians dictate claims.
 
-## How we use Google Cloud
+## How we use Google services
 
-- **Gemini (Vertex AI):** Gemini 2.5 Flash reads multilingual notes, photos and voice (Intake), answers grounded
-  questions with function calling (Ask), and checks supplier replies. Gemini 2.5 Pro ranks root causes against the PFMEA
-  and drafts the 8D with validated citations. `gemini-embedding-001` powers clustering and live claim linking.
-  All outputs use structured JSON schemas; numbers come from BigQuery tools, never from the model.
-- **Cloud Run:** two services in asia-southeast1 — the Next.js web app and the FastAPI agent API. The agent API runs
-  as one service account (no API keys) and calls Vertex AI, BigQuery, Firestore and Cloud Storage.
-- **Firestore:** the live system of record for cases, every agent step, approvals, the 8D draft and chat. Every screen
-  (web, phone and watch) subscribes to Firestore, so agent progress and hand-offs between people appear in real time.
-  Security rules limit suppliers to their own cases.
-- **Firebase:** Firebase Authentication with custom claims for five roles (dealer, analyst, supplier quality,
-  supplier, head of quality) plus a judge demo account that can switch roles.
-- Also: BigQuery (claims, vehicles, batches, stock, PFMEA), Cloud Storage (photos), Pub/Sub and Cloud Scheduler
-  (async intake, hourly signal scan), Cloud Text-to-Speech and Gemini image generation for demo assets.
+- **Gemini on Vertex AI:** Gemini 3.8 Flash reads multilingual notes, photos and voice (Intake), answers questions
+  with tools (Ask) and checks supplier replies. Gemini 4 Argon ranks root causes against the PFMEA and drafts the 8D.
+  `gemini-embedding-001` powers clustering and live claim linking. Outputs use structured JSON schemas, every citation
+  is checked against the input, and numbers come from BigQuery, never from the model.
+- **Google Agent Development Kit (ADK):** the investigation is an ADK `SequentialAgent` (Trace → Hypothesise →
+  Draft 8D), and Ask is an ADK `LlmAgent` with case-scoped Python tools. Each step is a deterministic, tool-backed
+  ADK agent, so we keep full control of what the model may cite.
+- **Cloud Run:** two services in asia-southeast1 — the Next.js web app and the FastAPI agent API, which runs as one
+  service account (no API keys).
+- **Firestore:** the live system of record for cases, every agent step, approvals, the 8D and chat. Web, phone and
+  watch screens all subscribe to it, so agent progress and hand-offs appear in real time. Security rules limit each
+  supplier to its own cases.
+- **Firebase Authentication:** five roles via custom claims (dealer, analyst, supplier quality, supplier, head of
+  quality), plus a judge account that can switch roles.
+- **Also:** BigQuery (claims, vehicles, batches, stock, PFMEA), Cloud Storage (photos and voice), Pub/Sub and Cloud
+  Scheduler (asynchronous intake, hourly signal scan), Cloud Text-to-Speech and Gemini image generation for demo assets.
 
-## Measured on our synthetic dataset (6,400 vehicles, 630+ claims)
+## Results on our test dataset (6,400 vehicles, 630+ claims, 3 languages)
 
-Claim linked in ~6 s · cited 8D draft in 59 s · 630/630 claims classified correctly and 162/162 Hindi notes understood
-(clean synthetic notes, so real-world accuracy will be lower) · 56/56 planted failure claims recalled · correct supplier
-batches found · 307 at-risk vehicles flagged before failure · 4 gaps caught in the supplier’s reply.
+- Cited 8D draft in about 90 seconds (live ADK run); a new claim linked to its case in ~6 seconds.
+- 99/100 on a hand-written hard set of messy notes (typos, Hinglish, slang, two-word notes); the one miss was
+  “leak hai neeche” (“there is a leak underneath”). 630/630 on the clean generated notes.
+- 56/56 planted failure claims recalled; both bad supplier batches found; 307 at-risk cars flagged with no claims yet.
+- 4 gaps caught in the supplier’s reply in the recorded run.
+- Estimated cost at pilot scale (10,000 claims a month): about $280 a month, ≈ 2.8¢ per claim, at list prices.
