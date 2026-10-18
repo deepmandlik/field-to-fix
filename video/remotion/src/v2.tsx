@@ -23,8 +23,9 @@ export const Karaoke: React.FC<{ text: string; voSeconds: number; dark?: boolean
   const chunk = chunks.find((c) => c.includes(active)) ?? chunks[0];
   const ink = dark ? "#FFFFFF" : C.ink;
   const dim = dark ? "rgba(255,255,255,0.72)" : "#5F6368";
-  const hiBg = dark ? C.amber : C.blue;
-  const hiInk = dark ? "#1F1F1F" : "#FFFFFF";
+  const GOOGLE = ["#4285F4", "#EA4335", "#FBBC05", "#34A853"];
+  const hiBg = GOOGLE[active % 4];
+  const hiInk = active % 4 === 2 ? "#202124" : "#FFFFFF"; // dark text on yellow for contrast
   return (
     <div style={{ position: "absolute", left: 60, right: 60, bottom: 30, display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "4px 12px", fontFamily,
       fontSize: 40, fontWeight: 500, textShadow: dark ? "0 2px 10px rgba(0,0,0,.65)" : "0 1px 0 rgba(255,255,255,.9)" }}>
@@ -75,7 +76,7 @@ const Heading: React.FC<{ eyebrow: string; color: string; title: string }> = ({ 
   </>);
 };
 
-export type CalloutSpec = { at: number; title: string; body: string; color: string; dark?: boolean };
+export type CalloutSpec = { at: number; title: string; body: string; color: string; dark?: boolean; chime?: boolean };
 export const makeRec = (o: { src: string; eyebrow: string; color: string; title: string; keys?: Key[]; callouts: CalloutSpec[]; bg?: string }) => {
   const Comp: React.FC<{ rate: number }> = ({ rate }) => (
     <AbsoluteFill style={{ background: o.bg ?? C.bg, fontFamily }}>
@@ -86,6 +87,7 @@ export const makeRec = (o: { src: string; eyebrow: string; color: string; title:
       ))}
     </AbsoluteFill>
   );
+  (Comp as any).cues = o.callouts.map((c) => ({ at: c.at, chime: !!c.chime }));
   return Comp;
 };
 
@@ -110,6 +112,7 @@ export const makeWatchRec = (o: { src: string; eyebrow: string; title: string; f
       </AbsoluteFill>
     );
   };
+  (Comp as any).cues = o.callouts.map((c) => ({ at: c.at + (o.broll ? 3.2 : 0), chime: !!c.chime }));
   return Comp;
 };
 
