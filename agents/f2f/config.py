@@ -9,8 +9,8 @@ class Settings:
     # Gemini is called through the global endpoint; embeddings through a region that serves them.
     gemini_location: str = os.getenv("GOOGLE_CLOUD_LOCATION", "global")
     embed_location: str = os.getenv("EMBED_LOCATION", "us-central1")
-    model_fast: str = os.getenv("MODEL_FAST", "gemini-2.5-flash")
-    model_reason: str = os.getenv("MODEL_REASON", "gemini-2.5-pro")
+    model_fast: str = os.getenv("MODEL_FAST", "gemini-3.8-flash")
+    model_reason: str = os.getenv("MODEL_REASON", "gemini-4-argon")
     model_embed: str = os.getenv("MODEL_EMBED", "gemini-embedding-001")
     embed_dim: int = int(os.getenv("EMBED_DIM", "768"))
     bq_dataset: str = os.getenv("BQ_DATASET", "f2f")

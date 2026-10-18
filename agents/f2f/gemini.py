@@ -49,7 +49,7 @@ def with_retry(fn, *args, attempts: int = 8, **kwargs):
         try:
             return fn(*args, **kwargs)
         except errors.APIError as e:
-            if e.code not in (429, 500, 503) or i == attempts - 1:
+            if e.code not in (429, 500, 502, 503, 504) or i == attempts - 1:
                 raise
         except (httpx.TransportError, ConnectionError):  # transient network / TLS failures
             if i == attempts - 1:
