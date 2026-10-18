@@ -71,22 +71,21 @@ const Video: React.FC = () => {
   let from = 0;
   return (
     <AbsoluteFill style={{ background: "#131314" }}>
-      {plan.map((p) => {
+      {plan.map((p, idx) => {
         const start = from;
         from += p.frames;
         return (
           <Sequence key={p.id} from={start} durationInFrames={p.frames} name={p.id}>
             <SceneFade bg={p.dark ? "#131314" : "#F8FAFD"}><p.Comp {...p.props} /></SceneFade>
             <Sequence from={Math.round(LEAD * FPS)}><Audio src={staticFile(`${p.id}.wav`)} /></Sequence>
-            {/* minimal sound design: soft whoosh on each cut, a light pop per callout, a chime on successes */}
-            <Sequence durationInFrames={24}><Audio src={staticFile("sfx-whoosh.wav")} volume={0.16} /></Sequence>
+            {/* minimal sound design: a different soft transition sound on each cut, a light pop per callout, a chime on successes */}
+            {idx > 0 && <Sequence durationInFrames={40}><Audio src={staticFile(`sfx-t${((idx - 1) % 6) + 1}.wav`)} volume={0.13} /></Sequence>}
             {((p.Comp as any).cues ?? []).map((c: { at: number; chime: boolean }, i: number) => (
               <Sequence key={i} from={Math.round(c.at * FPS)} durationInFrames={c.chime ? 40 : 6}>
                 <Audio src={staticFile(c.chime ? "sfx-chime.wav" : "sfx-pop.wav")} volume={c.chime ? 0.22 : 0.18} />
               </Sequence>
             ))}
             {p.id === "close" && <Sequence from={Math.round(0.3 * FPS)} durationInFrames={40}><Audio src={staticFile("sfx-chime.wav")} volume={0.25} /></Sequence>}
-            {p.id === "title" && <Sequence from={Math.round(0.2 * FPS)} durationInFrames={24}><Audio src={staticFile("sfx-whoosh.wav")} volume={0.22} /></Sequence>}
             <Karaoke text={p.text} voSeconds={p.seconds} dark={p.dark || (p.id === "watchapprove")} />
           </Sequence>
         );

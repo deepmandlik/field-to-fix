@@ -373,18 +373,15 @@ for i, (name, note, v) in enumerate(items):
     if i < len(items) - 1:
         ln = s.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(0.5), Inches(y + 0.44), Inches(6.45), Inches(y + 0.44))
         ln.line.color.rgb = rgb("F1F3F4"); ln.line.width = Pt(0.75)
-cards = (("≈ $200 / month", "whole pilot, Gemini thinking tokens included"),
-         ("≈ 2¢", "per warranty claim handled"),
-         ("+ ≈ $3", "per extra 1,000 claims; compute stays flat"))
-for i, (big, small) in enumerate(cards):
-    y = 1.45 + i * 0.93
-    box(s, 6.75, y, 2.91, 0.85, fill="FFFFFF", accent=GREEN)
-    text(s, 6.88, y + 0.1, 2.7, 0.42, [(big, {"bold": True, "color": GREEN})], size=19)
-    text(s, 6.88, y + 0.5, 2.7, 0.3, [small], size=8.5, color=MUTED)
-box(s, 6.75, 4.24, 2.91, 0.88, fill="F8FAFD", line="E8EAED")
-text(s, 6.88, 4.29, 2.7, 0.8, [("Ways to cut it", {"bold": True, "size": 9.5}),
-                               "Batch / Flex Gemini for the hourly scan (~50% off), committed-use discount on Cloud Run, scale agents to zero after hours."],
-     size=8, color=MUTED)
+cards = (("≈ $200", "per month for the whole pilot", "Gemini thinking tokens included"),
+         ("≈ 2¢", "per warranty claim handled", "$200 ÷ 10,000 claims a month"),
+         ("+ ≈ $3", "per extra 1,000 claims", "Gemini grows with claims; compute stays flat"))
+for i, (big, label, note) in enumerate(cards):
+    y = 1.45 + i * 1.255
+    box(s, 6.75, y, 2.91, 1.16, fill="FFFFFF", accent=GREEN)
+    text(s, 6.9, y + 0.16, 2.7, 0.45, [(big, {"bold": True, "color": GREEN})], size=24)
+    text(s, 6.9, y + 0.62, 2.7, 0.25, [(label, {"bold": True})], size=10)
+    text(s, 6.9, y + 0.85, 2.7, 0.25, [note], size=8, color=FAINT)
 footer(s, 10)
 
 # ---------- 11–13. Snapshots (two full screens per page, each explained) ----------
