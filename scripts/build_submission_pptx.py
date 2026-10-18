@@ -226,17 +226,21 @@ for label, val in (("Team name: ", "Field-to-Fix"), ("Team leader name: ", "Deep
 
 # ---------- 2. Brief about the idea ----------
 s = S[2]; set_title(s, "Brief about the idea", "Field-to-Fix: dealers file it, OEMs approve it, suppliers solve it")
-text(s, 0.33, 1.5, 4.6, 3.6, [
-    ("The problem", {"bold": True, "color": RED, "size": 12}),
-    "A part fails in the field. The dealer fixes it and writes a short note, often in Hindi or Bahasa. Car makers take about 7 weeks "
-    "to find the root cause and 9–10 more to fix it at the supplier, while bad parts keep shipping (≈ $58B a year in warranty).",
-    ("Our idea", {"bold": True, "color": BLUE, "size": 12}),
-    "Five Gemini agents on Google Cloud read every claim (text, photo, voice, any language), find failure clusters early, trace them "
-    "to the exact supplier batch, rank root causes against the factory PFMEA, and draft the 8D report. People approve every step.",
-    ("The result", {"bold": True, "color": GREEN, "size": 12}),
-    "From first claims to an 8D at the supplier in under a day instead of ~19 weeks, on web, phone and smartwatch.",
-], size=10, color=MUTED)
-image(s, "02-start.jpg", 5.15, 1.5, w=4.5, h=3.5)
+text(s, 0.33, 1.45, 4.45, 3.7, [
+    ("The problem", {"bold": True, "color": RED, "size": 11.5}),
+    ("A part fails in the field. The dealer fixes it and writes a short note, often in Hindi or Bahasa. Car makers take about 7 weeks "
+     "to find the root cause and 9–10 more to fix it at the supplier, while bad parts keep shipping (≈ $58B a year in warranty).", {"space": 5}),
+    ("Our idea", {"bold": True, "color": BLUE, "size": 11.5}),
+    ("Five Gemini agents on Google Cloud read every claim (text, photo, voice, any language), find failure clusters early, trace them "
+     "to the exact supplier batch, rank root causes against the factory PFMEA, and draft the 8D report. People approve every step.", {"space": 5}),
+    ("Who uses it", {"bold": True, "color": INK, "size": 11.5}),
+    ("Dealer technicians file claims, OEM warranty analysts investigate, supplier-quality engineers approve the 8D, Tier-1 "
+     "suppliers answer it, and the head of quality watches cost and risk, on web, phone or smartwatch.", {"space": 5}),
+    ("The result", {"bold": True, "color": GREEN, "size": 11.5}),
+    "From first claims to an 8D at the supplier in under a day instead of ~19 weeks, with every number traceable to data.",
+], size=9.5, color=MUTED)
+image(s, "02-start.jpg", 4.95, 1.5, w=4.71)
+text(s, 4.95, 4.5, 4.71, 0.5, [("Start page of the live prototype: the story, the five roles and a guided judge tour.", {"color": FAINT})], size=8.5, align=PP_ALIGN.CENTER)
 footer(s, 2)
 
 # ---------- 3. Opportunities ----------
