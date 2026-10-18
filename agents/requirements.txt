@@ -11,3 +11,4 @@ numpy>=1.26
 scikit-learn>=1.4
 reportlab>=4.2
 python-dotenv>=1.0
+google-adk>=2.12,<3

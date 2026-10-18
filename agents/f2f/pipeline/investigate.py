@@ -56,7 +56,8 @@ def _clean_cites(cites: list[str], allowed: set[str]) -> list[str]:
     return [c for c in cites if c in allowed and ID_RE.match(c)]
 
 
-def run(case_id: str) -> None:
+def trace_step(case_id: str) -> dict:
+    """Agent 3 — Trace. Returns the working state the later steps need."""
     case = fs.get_case(case_id)
     if not case:
         raise ValueError(f"case {case_id} not found")
@@ -64,7 +65,6 @@ def run(case_id: str) -> None:
     t0 = time.time()
     fs.update_case(case_id, {"status": "investigating"})
 
-    # ---- Agent 3: Trace ----
     fs.event(case_id, "trace", f"Tracing {len(ids)} claims to vehicles, plants and supplier batches…", 5, "running")
     tr = bq.trace_vins(ids)
     rows, n = tr["rows"], tr["n"]
@@ -105,8 +105,14 @@ def run(case_id: str) -> None:
     if other_models:
         fitted = ", ".join("{} ({} VINs)".format(m["model"], m["vins_at_risk"]) for m in other_models)
         fs.event(case_id, "trace", f"Same batches also fitted to {fitted}", 40)
+    return {"case_id": case_id, "case": case, "ids": ids, "t0": t0, "trace": trace, "stock": stock,
+            "other_models": other_models, "part_name": part_name}
 
-    # ---- Agent 4: Hypothesise ----
+
+def hypothesise_step(st: dict) -> dict:
+    """Agent 4 — Hypothesise: retrieve PFMEA + control plan, rank cited root causes."""
+    case_id, case, ids, trace, part_name = st["case_id"], st["case"], st["ids"], st["trace"], st["part_name"]
+
     fs.event(case_id, "hypothesise", "Searching PFMEA and control plan for matching failure modes…", 45, "running")
     claims = bq.get_claims(ids[:40])
     query = f"{case.get('component')} {case.get('failure_mode')} {part_name}. " + " ".join(
@@ -135,8 +141,14 @@ def run(case_id: str) -> None:
     fs.update_case(case_id, {"hypotheses": hyps, "recommended_checks": hyp.recommended_checks, "pfmea": pfmea, "control_plan": cplan})
     if hyps:
         fs.event(case_id, "hypothesise", f"Top hypothesis: {hyps[0]['cause']} (confidence {hyps[0]['confidence']:.2f})", 70)
+    return {**st, "context": context, "hyps": hyps, "allowed": allowed}
 
-    # ---- Agent 5: Draft 8D ----
+
+def draft_step(st: dict) -> dict:
+    """Agent 5 — Draft 8D (D2–D5) with validated citations, then snapshot the run for the demo replay."""
+    case_id, context, hyps, allowed = st["case_id"], st["context"], st["hyps"], st["allowed"]
+    stock, other_models, t0 = st["stock"], st["other_models"], st["t0"]
+
     fs.event(case_id, "draft_8d", "Drafting 8D (D2–D5) with citations…", 75, "running")
     draft_ctx = json.dumps({**json.loads(context), "hypotheses": hyps, "stock": stock,
                             "other_models_at_risk": other_models}, default=str)
@@ -152,3 +164,16 @@ def run(case_id: str) -> None:
     fs.event(case_id, "draft_8d", f"8D draft ready for supplier-quality review · investigation took {secs}s", 100)
     from .. import demo
     demo.snapshot(case_id)
+    return {**st, "seconds": secs}
+
+
+def run(case_id: str) -> None:
+    """Run the three agents in order. Orchestrated by Google ADK when available (see f2f/adk_agents.py)."""
+    from .. import adk_agents
+    if adk_agents.enabled():
+        return adk_agents.run_investigation(case_id)
+    run_direct(case_id)
+
+
+def run_direct(case_id: str) -> None:
+    draft_step(hypothesise_step(trace_step(case_id)))
