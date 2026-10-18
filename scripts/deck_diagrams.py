@@ -140,7 +140,7 @@ arch = tier_stack([
         ("Firestore", "live cases, log", ORANGE), ("Storage", "photos, voice", GREEN), ("Pub/Sub", "+ Scheduler", RED)]},
     {"name": "Agents", "sub": "Cloud Run · Google ADK", "color": BLUE, "chips": [
         ("Intake", "text, photo, voice", ORANGE), ("Signal", "clusters", BLUE), ("Trace", "batch + lift", TEAL),
-        ("Hypothesise", "vs PFMEA", PURPLE), ("Draft 8D", "cited", GREEN), ("Ask + check", "grounded", RED)]},
+        ("Hypothesise", "vs PFMEA", PURPLE), ("Draft 8D", "cited", GREEN), ("Ask", "on Agent Engine", RED)]},
     {"name": "Experience", "sub": "Cloud Run · Firebase", "color": GREEN, "chips": [
         ("Next.js web app", "Cloud Run", BLUE), ("Firebase Auth", "5 roles + judge", ORANGE),
         ("Phone + tablet", "responsive", GREEN), ("Watch view", "watchOS · Wear OS", RED)]},

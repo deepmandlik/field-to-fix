@@ -2,8 +2,8 @@
  "summary": {
   "model": "gemini-3.8-flash",
   "notes": 100,
-  "correct": 99,
-  "accuracy": 0.99,
+  "correct": 100,
+  "accuracy": 1.0,
   "by_tag": {
    "abbrev": "5/5",
    "bahasa": "18/18",
@@ -11,7 +11,7 @@
    "indirect": "17/17",
    "noisy": "9/9",
    "plain": "8/8",
-   "short": "17/18",
+   "short": "18/18",
    "slang": "9/9",
    "typo": "16/16"
   }
@@ -23,7 +23,7 @@
    "truth": "clamp_leak",
    "pred": "clamp_leak",
    "ok": true,
-   "component": "coolant hose clamp",
+   "component": "hose clamp",
    "failure_mode": "leak near clamp",
    "lang": "en",
    "translated": "Coolant leak near hose clamp, tightened"
@@ -34,17 +34,17 @@
    "truth": "clamp_leak",
    "pred": "clamp_leak",
    "ok": true,
-   "component": "coolant pipe clip",
-   "failure_mode": "loose clip",
+   "component": "pipe clamp",
+   "failure_mode": "loose",
    "lang": "hi",
-   "translated": "Coolant is getting low, the pipe clamp was loose."
+   "translated": "Coolant is decreasing, pipe clamp was loose."
   },
   {
    "note": "leak hai neeche",
    "tag": "short",
    "truth": "clamp_leak",
-   "pred": "door_seal_leak",
-   "ok": false,
+   "pred": "clamp_leak",
+   "ok": true,
    "component": "unknown",
    "failure_mode": "leak",
    "lang": "hi",
@@ -68,9 +68,9 @@
    "pred": "clamp_leak",
    "ok": true,
    "component": "radiator hose clamp",
-   "failure_mode": "loose clamp causing seepage",
+   "failure_mode": "loose clamp causing seepage/leak",
    "lang": "id",
-   "translated": "radiator hose is seeping, the clamp is loose bro"
+   "translated": "Radiator hose is leaking/seeping, the clamp is loose bro"
   },
   {
    "note": "green fluid puddle under engine bay every morning, band on rubber pipe was loose",
@@ -78,8 +78,8 @@
    "truth": "clamp_leak",
    "pred": "clamp_leak",
    "ok": true,
-   "component": "hose clamp",
-   "failure_mode": "loose clamp causing leak",
+   "component": "rubber pipe band",
+   "failure_mode": "loose",
    "lang": "en",
    "translated": "green fluid puddle under engine bay every morning, band on rubber pipe was loose"
   },
@@ -89,10 +89,10 @@
    "truth": "clamp_leak",
    "pred": "clamp_leak",
    "ok": true,
-   "component": "coolant hose joint clamp",
-   "failure_mode": "loose clamp",
+   "component": "hose joint clamp",
+   "failure_mode": "slack / loose",
    "lang": "en",
-   "translated": "Temperature gauge going high, coolant topped twice this week, hose joint clamp slack."
+   "translated": "temp gauge going high, coolant topped twice this week, hose joint clamp slack"
   },
   {
    "note": "radiator pipe joint se paani jaisa liquid tapak raha, clamp naya lagaya",
@@ -103,7 +103,7 @@
    "component": "radiator pipe joint / clamp",
    "failure_mode": "leak at joint",
    "lang": "hi",
-   "translated": "Water-like liquid is dripping from the radiator pipe joint, installed a new clamp."
+   "translated": "Water-like liquid is dripping from the radiator pipe joint, installed a new clamp"
   },
   {
    "note": "clmp loos. cooolant. fixd",
@@ -125,7 +125,7 @@
    "component": "radiator hose clamp",
    "failure_mode": "leak",
    "lang": "id",
-   "translated": "radiator coolant leak, hose clamp replaced, customer happy"
+   "translated": "Radiator coolant leak, hose clamp replaced, customer happy"
   },
   {
    "note": "overheating complaint, root: hose clamp lost tension, replaced + flushed",
@@ -158,7 +158,7 @@
    "component": "brake pad",
    "failure_mode": "worn out",
    "lang": "hi",
-   "translated": "Squeaking noise immediately upon applying brakes, pads are worn out"
+   "translated": "Squeaking noise as soon as brakes are applied, pads are worn out"
   },
   {
    "note": "squeal when stopping at signals, pads shiny glazed, replaced",
@@ -178,9 +178,9 @@
    "pred": "brake_squeal",
    "ok": true,
    "component": "brakes",
-   "failure_mode": "noise",
+   "failure_mode": "squeaking noise",
    "lang": "id",
-   "translated": "brakes make a squeaking noise when braking slowly"
+   "translated": "brakes make a squeaking sound when braking slowly"
   },
   {
    "note": "high pitch sound from front wheel only when pedal pressed, otherwise ok. customer also wants seat cover",
@@ -188,7 +188,7 @@
    "truth": "brake_squeal",
    "pred": "brake_squeal",
    "ok": true,
-   "component": "front brake",
+   "component": "front wheel brakes",
    "failure_mode": "noise",
    "lang": "en",
    "translated": "high pitch sound from front wheel only when pedal pressed, otherwise ok. customer also wants seat cover"
@@ -224,7 +224,7 @@
    "component": "front brake disc",
    "failure_mode": "noise",
    "lang": "hi",
-   "translated": "Whistle-like sound from the front disc area on braking."
+   "translated": "Whistling sound from front disc area upon braking"
   },
   {
    "note": "kampas rem keras & berisik, ganti baru",
@@ -235,7 +235,7 @@
    "component": "brake pads",
    "failure_mode": "hardened and noisy",
    "lang": "id",
-   "translated": "Brake pads hard & noisy, replaced with new ones"
+   "translated": "brake pads hard & noisy, replace with new ones"
   },
   {
    "note": "noise during deceleration from wheels, pad material hardened",
@@ -266,9 +266,9 @@
    "pred": "infotainment_reboot",
    "ok": true,
    "component": "infotainment screen",
-   "failure_mode": "rebooting / restarting",
+   "failure_mode": "restarting",
    "lang": "hi",
-   "translated": "Screen restarts when connecting a phone"
+   "translated": "Screen restarts when phone is connected"
   },
   {
    "note": "HU reboot loop w/ BT",
@@ -288,9 +288,9 @@
    "pred": "infotainment_reboot",
    "ok": true,
    "component": "music system",
-   "failure_mode": "intermittent rebooting",
+   "failure_mode": "rebooting / turning off and on",
    "lang": "hi",
-   "translated": "Music system turns off and restarts, on Bluetooth."
+   "translated": "Music system turns off and restarts on bluetooth"
   },
   {
    "note": "layar mati nyala sendiri pas carplay",
@@ -298,10 +298,10 @@
    "truth": "infotainment_reboot",
    "pred": "infotainment_reboot",
    "ok": true,
-   "component": "infotainment screen",
+   "component": "display screen",
    "failure_mode": "intermittent power cycle",
    "lang": "id",
-   "translated": "Screen turns off and on by itself during CarPlay"
+   "translated": "screen turns off and on by itself when using carplay"
   },
   {
    "note": "touchscreen goes black and logo shows again randomly, mostly when android auto running",
@@ -309,8 +309,8 @@
    "truth": "infotainment_reboot",
    "pred": "infotainment_reboot",
    "ok": true,
-   "component": "infotainment touchscreen",
-   "failure_mode": "intermittent rebooting",
+   "component": "touchscreen display / infotainment system",
+   "failure_mode": "rebooting / going black",
    "lang": "en",
    "translated": "touchscreen goes black and logo shows again randomly, mostly when android auto running"
   },
@@ -323,7 +323,7 @@
    "component": "infotainment system",
    "failure_mode": "rebooting",
    "lang": "en",
-   "translated": "infotainment rebooting"
+   "translated": "Infotainment rebooting"
   },
   {
    "note": "radio display keeps resetting itself, customer annoyed, also checked tyre pressure",
@@ -332,7 +332,7 @@
    "pred": "infotainment_reboot",
    "ok": true,
    "component": "radio display",
-   "failure_mode": "resets itself repeatedly",
+   "failure_mode": "resets intermittently",
    "lang": "en",
    "translated": "radio display keeps resetting itself, customer annoyed, also checked tyre pressure"
   },
@@ -354,9 +354,9 @@
    "pred": "infotainment_reboot",
    "ok": true,
    "component": "navigation screen",
-   "failure_mode": "freezing and restarting",
+   "failure_mode": "freezes and restarts",
    "lang": "hi",
-   "translated": "navigation screen freezes then restarts"
+   "translated": "Navigation screen freezes and then restarts"
   },
   {
    "note": "BT connect -> screen blank -> restart",
@@ -364,8 +364,8 @@
    "truth": "infotainment_reboot",
    "pred": "infotainment_reboot",
    "ok": true,
-   "component": "infotainment system",
-   "failure_mode": "screen goes blank and restarts",
+   "component": "infotainment screen / head unit",
+   "failure_mode": "screen blanks and reboots",
    "lang": "en",
    "translated": "BT connect -> screen blank -> restart"
   },
@@ -376,7 +376,7 @@
    "pred": "infotainment_reboot",
    "ok": true,
    "component": "head unit",
-   "failure_mode": "spontaneous reboot",
+   "failure_mode": "restarting on its own",
    "lang": "id",
    "translated": "head unit restarts on its own, software update"
   },
@@ -386,7 +386,7 @@
    "truth": "ac_weak",
    "pred": "ac_weak",
    "ok": true,
-   "component": "air conditioning",
+   "component": "AC",
    "failure_mode": "not cooling",
    "lang": "en",
    "translated": "AC not cooling"
@@ -408,8 +408,8 @@
    "truth": "ac_weak",
    "pred": "ac_weak",
    "ok": true,
-   "component": "AC compressor",
-   "failure_mode": "grinding noise and failure to cool",
+   "component": "compressor",
+   "failure_mode": "grinding sound / failure to cool",
    "lang": "en",
    "translated": "cabin hot even at max fan, compressor making grinding sound"
   },
@@ -419,10 +419,10 @@
    "truth": "ac_weak",
    "pred": "ac_weak",
    "ok": true,
-   "component": "air conditioning compressor",
-   "failure_mode": "noise and insufficient cooling",
+   "component": "AC compressor",
+   "failure_mode": "noise and degraded cooling performance",
    "lang": "id",
-   "translated": "AC is not cold enough, compressor is noisy"
+   "translated": "AC is not cold enough, compressor is making noise"
   },
   {
    "note": "weak cooling",
@@ -442,9 +442,9 @@
    "pred": "ac_weak",
    "ok": true,
    "component": "air conditioning compressor",
-   "failure_mode": "inoperative",
+   "failure_mode": "inoperative / blowing warm air despite normal gas level",
    "lang": "en",
-   "translated": "aircon blows warm air in traffic, gas ok, comp replaced"
+   "translated": "Air conditioning blows warm air in traffic, refrigerant gas is okay, compressor replaced."
   },
   {
    "note": "AC chalu karne pe khat khat awaaz aur hawa garam",
@@ -453,9 +453,9 @@
    "pred": "ac_weak",
    "ok": true,
    "component": "air conditioning system",
-   "failure_mode": "rattling noise and loss of cooling",
+   "failure_mode": "noise and blowing warm air",
    "lang": "hi",
-   "translated": "Rattling/clicking noise and warm air when turning on the AC."
+   "translated": "Rattling noise when AC is turned on and the air is warm"
   },
   {
    "note": "a/c compresser noisy + poor cool",
@@ -464,9 +464,9 @@
    "pred": "ac_weak",
    "ok": true,
    "component": "a/c compressor",
-   "failure_mode": "noisy operation and reduced cooling capacity",
+   "failure_mode": "noisy and poor cooling",
    "lang": "en",
-   "translated": "A/C compressor noisy and poor cooling"
+   "translated": "a/c compresser noisy + poor cool"
   },
   {
    "note": "customer says car feels like oven in afternoon, cooling system compressor weak. also washed car",
@@ -475,9 +475,9 @@
    "pred": "ac_weak",
    "ok": true,
    "component": "cooling system compressor",
-   "failure_mode": "weak performance",
+   "failure_mode": "weak",
    "lang": "en",
-   "translated": "Customer says car feels like an oven in the afternoon, cooling system compressor is weak. Also washed car."
+   "translated": "customer says car feels like oven in afternoon, cooling system compressor weak. also washed car"
   },
   {
    "note": "dingin nya kurang bgt",
@@ -488,7 +488,7 @@
    "component": "air conditioning system",
    "failure_mode": "insufficient cooling",
    "lang": "id",
-   "translated": "cooling is very insufficient"
+   "translated": "It's not cold enough at all / The cooling is very insufficient"
   },
   {
    "note": "climate control not reaching set temp, compressor clutch slipping",
@@ -507,7 +507,7 @@
    "truth": "window_noise",
    "pred": "window_noise",
    "ok": true,
-   "component": "window",
+   "component": "window regulator / power window",
    "failure_mode": "slow operation",
    "lang": "en",
    "translated": "window slow"
@@ -518,10 +518,10 @@
    "truth": "window_noise",
    "pred": "window_noise",
    "ok": true,
-   "component": "driver side window regulator",
+   "component": "driver side window / window regulator",
    "failure_mode": "slow operation and abnormal noise",
    "lang": "hi",
-   "translated": "Driver side window goes up slowly, grinding/creaking noise"
+   "translated": "driver side glass goes up slowly, grinding/creaking noise"
   },
   {
    "note": "glass goes up very slow with grinding, regulatr changed",
@@ -530,7 +530,7 @@
    "pred": "window_noise",
    "ok": true,
    "component": "window regulator",
-   "failure_mode": "slow operation with grinding noise",
+   "failure_mode": "grinding and slow operation",
    "lang": "en",
    "translated": "glass goes up very slow with grinding, regulatr changed"
   },
@@ -540,10 +540,10 @@
    "truth": "window_noise",
    "pred": "window_noise",
    "ok": true,
-   "component": "driver door window regulator / glass",
-   "failure_mode": "slow operation and creaking noise",
+   "component": "driver's door window regulator",
+   "failure_mode": "slow operation and noise",
    "lang": "id",
-   "translated": "Driver door window goes up slowly, creaking sound"
+   "translated": "driver's door window goes up slowly, makes a cracking/creaking noise"
   },
   {
    "note": "power window motor struggling, noise from inside door panel",
@@ -565,7 +565,7 @@
    "component": "driver door power window",
    "failure_mode": "slow operation and noise",
    "lang": "en",
-   "translated": "Power window slow + noise driver door"
+   "translated": "power window slow + noise driver door"
   },
   {
    "note": "window jam half way sometimes, regulator worn",
@@ -584,10 +584,10 @@
    "truth": "window_noise",
    "pred": "window_noise",
    "ok": true,
-   "component": "door window regulator / glass",
-   "failure_mode": "hesitates or sticks while rolling up",
+   "component": "door glass",
+   "failure_mode": "stuttering or halting movement while rolling up",
    "lang": "hi",
-   "translated": "The door glass moves up jerky / gets stuck while rolling up."
+   "translated": "The door glass goes up haltingly / stutters when rolling up."
   },
   {
    "note": "customer complaint: front right glass sluggish. also requested oil change",
@@ -595,7 +595,7 @@
    "truth": "window_noise",
    "pred": "window_noise",
    "ok": true,
-   "component": "front right power window",
+   "component": "front right window regulator or motor",
    "failure_mode": "sluggish operation",
    "lang": "en",
    "translated": "customer complaint: front right glass sluggish. also requested oil change"
@@ -609,7 +609,7 @@
    "component": "window regulator",
    "failure_mode": "slow operation",
    "lang": "id",
-   "translated": "window regulator replaced, slow to go up"
+   "translated": "Window regulator replaced, slow to roll up"
   },
   {
    "note": "windw regultor grindng",
@@ -620,7 +620,7 @@
    "component": "window regulator",
    "failure_mode": "grinding noise",
    "lang": "en",
-   "translated": "window regulator grinding"
+   "translated": "Window regulator grinding"
   },
   {
    "note": "car dead after weekend",
@@ -642,7 +642,7 @@
    "component": "battery",
    "failure_mode": "dead / discharged",
    "lang": "hi",
-   "translated": "Kept parked for 2 days and then it did not start, battery dead"
+   "translated": "Kept parked for 2 days then it did not start, battery dead"
   },
   {
    "note": "batt flat aftr parking",
@@ -651,9 +651,9 @@
    "pred": "battery_drain",
    "ok": true,
    "component": "battery",
-   "failure_mode": "flat / discharged",
+   "failure_mode": "flat",
    "lang": "en",
-   "translated": "Battery flat after parking"
+   "translated": "batt flat aftr parking"
   },
   {
    "note": "aki tekor habis parkir 2 hari",
@@ -662,9 +662,9 @@
    "pred": "battery_drain",
    "ok": true,
    "component": "battery",
-   "failure_mode": "drained",
+   "failure_mode": "drained / discharged",
    "lang": "id",
-   "translated": "Battery drained after parking for 2 days"
+   "translated": "battery drained after being parked for 2 days"
   },
   {
    "note": "no crank in morning after car parked since friday, jump started, parasitic draw found",
@@ -675,7 +675,7 @@
    "component": "electrical system",
    "failure_mode": "parasitic draw",
    "lang": "en",
-   "translated": "No crank in the morning after the car was parked since Friday, jump started, parasitic draw found."
+   "translated": "no crank in morning after car parked since friday, jump started, parasitic draw found"
   },
   {
    "note": "self nahi le rahi subah, battery down",
@@ -684,9 +684,9 @@
    "pred": "battery_drain",
    "ok": true,
    "component": "battery",
-   "failure_mode": "discharged",
+   "failure_mode": "discharged / dead",
    "lang": "hi",
-   "translated": "Starter not engaging in the morning, battery is dead."
+   "translated": "Not taking self-start in the morning, battery down"
   },
   {
    "note": "battry draining overnite, replaced",
@@ -695,9 +695,9 @@
    "pred": "battery_drain",
    "ok": true,
    "component": "battery",
-   "failure_mode": "draining",
+   "failure_mode": "draining overnight",
    "lang": "en",
-   "translated": "Battery draining overnight, replaced."
+   "translated": "battery draining overnight, replaced"
   },
   {
    "note": "customer stranded at office parking, clicking sound on start, battery 9V. also asked about insurance",
@@ -706,7 +706,7 @@
    "pred": "battery_drain",
    "ok": true,
    "component": "battery",
-   "failure_mode": "low voltage (9V)",
+   "failure_mode": "low voltage",
    "lang": "en",
    "translated": "customer stranded at office parking, clicking sound on start, battery 9V. also asked about insurance"
   },
@@ -717,9 +717,9 @@
    "pred": "battery_drain",
    "ok": true,
    "component": "battery",
-   "failure_mode": "battery failure / discharge",
+   "failure_mode": "depleted or dead battery",
    "lang": "id",
-   "translated": "car broke down after not being used, battery replaced"
+   "translated": "car broke down/stalled after not being used, battery replaced"
   },
   {
    "note": "dead batt",
@@ -730,7 +730,7 @@
    "component": "battery",
    "failure_mode": "dead / discharged",
    "lang": "en",
-   "translated": "Dead battery"
+   "translated": "dead battery"
   },
   {
    "note": "lights dim and engine wont turn after few days idle",
@@ -739,7 +739,7 @@
    "pred": "battery_drain",
    "ok": true,
    "component": "battery",
-   "failure_mode": "loss of charge",
+   "failure_mode": "discharged",
    "lang": "en",
    "translated": "lights dim and engine wont turn after few days idle"
   },
@@ -750,7 +750,7 @@
    "pred": "door_seal_leak",
    "ok": true,
    "component": "unknown",
-   "failure_mode": "water ingress",
+   "failure_mode": "water leak into cabin",
    "lang": "en",
    "translated": "water inside car when raining"
   },
@@ -760,10 +760,10 @@
    "truth": "door_seal_leak",
    "pred": "door_seal_leak",
    "ok": true,
-   "component": "rear seal",
-   "failure_mode": "water ingress / leakage",
+   "component": "rear weatherstrip / cabin seal",
+   "failure_mode": "water ingress",
    "lang": "hi",
-   "translated": "Water comes inside at the rear during rain"
+   "translated": "Water comes inside the rear during rain."
   },
   {
    "note": "rear footwell wet, rubber beading not fitting",
@@ -772,7 +772,7 @@
    "pred": "door_seal_leak",
    "ok": true,
    "component": "rubber beading",
-   "failure_mode": "improper fit",
+   "failure_mode": "improper fitment resulting in water leak",
    "lang": "en",
    "translated": "rear footwell wet, rubber beading not fitting"
   },
@@ -783,9 +783,9 @@
    "pred": "door_seal_leak",
    "ok": true,
    "component": "door rubber seal",
-   "failure_mode": "water ingress",
+   "failure_mode": "leak",
    "lang": "id",
-   "translated": "water enters during rain, door rubber"
+   "translated": "water enters when it rains, door rubber"
   },
   {
    "note": "dr seal lk",
@@ -796,7 +796,7 @@
    "component": "door seal",
    "failure_mode": "leak",
    "lang": "en",
-   "translated": "Door seal leak"
+   "translated": "door seal leak"
   },
   {
    "note": "carpet damp back seat after car wash, gasket on rear door loose",
@@ -805,7 +805,7 @@
    "pred": "door_seal_leak",
    "ok": true,
    "component": "rear door gasket",
-   "failure_mode": "loose gasket",
+   "failure_mode": "loose",
    "lang": "en",
    "translated": "carpet damp back seat after car wash, gasket on rear door loose"
   },
@@ -815,10 +815,10 @@
    "truth": "door_seal_leak",
    "pred": "door_seal_leak",
    "ok": true,
-   "component": "rear door rubber seal",
+   "component": "rear door weatherstrip rubber",
    "failure_mode": "leak",
    "lang": "hi",
-   "translated": "Water leak rear door, replaced rubber seal"
+   "translated": "Water leak rear door, rubber replaced"
   },
   {
    "note": "watter leekage from door",
@@ -827,9 +827,9 @@
    "pred": "door_seal_leak",
    "ok": true,
    "component": "door",
-   "failure_mode": "water leak",
+   "failure_mode": "leakage",
    "lang": "en",
-   "translated": "Water leakage from door"
+   "translated": "water leakage from door"
   },
   {
    "note": "mat basah di belakang, seal pintu diganti",
@@ -838,9 +838,9 @@
    "pred": "door_seal_leak",
    "ok": true,
    "component": "door seal",
-   "failure_mode": "water leak",
+   "failure_mode": "leak",
    "lang": "id",
-   "translated": "rear mat wet, door seal replaced"
+   "translated": "wet mat in the rear, door seal replaced"
   },
   {
    "note": "customer found puddle in rear after rain. also complained about horn. replaced door weatherstrip",
@@ -870,10 +870,10 @@
    "truth": "wiper_stall",
    "pred": "wiper_stall",
    "ok": true,
-   "component": "windshield wiper",
-   "failure_mode": "stops in the middle",
+   "component": "wiper",
+   "failure_mode": "stops mid-stroke",
    "lang": "hi",
-   "translated": "The wiper stops in the middle."
+   "translated": "wiper stops in the middle"
   },
   {
    "note": "wipr stuck mid way on fast",
@@ -882,9 +882,9 @@
    "pred": "wiper_stall",
    "ok": true,
    "component": "windshield wiper",
-   "failure_mode": "stuck midway",
+   "failure_mode": "stuck mid way",
    "lang": "en",
-   "translated": "Wiper stuck midway on fast setting"
+   "translated": "wiper stuck mid way on fast"
   },
   {
    "note": "wiper stop",
@@ -893,9 +893,9 @@
    "pred": "wiper_stall",
    "ok": true,
    "component": "windshield wiper",
-   "failure_mode": "stopped working",
+   "failure_mode": "stopped functioning",
    "lang": "en",
-   "translated": "Wiper stop"
+   "translated": "wiper stop"
   },
   {
    "note": "wiper mati di tengah kaca pas hujan deras",
@@ -904,7 +904,7 @@
    "pred": "wiper_stall",
    "ok": true,
    "component": "windshield wiper",
-   "failure_mode": "stopped working in the middle of the windshield",
+   "failure_mode": "stopped functioning / died mid-stroke",
    "lang": "id",
    "translated": "wiper died in the middle of the windshield during heavy rain"
   },
@@ -915,7 +915,7 @@
    "pred": "wiper_stall",
    "ok": true,
    "component": "wiper motor",
-   "failure_mode": "stops operating mid-stroke",
+   "failure_mode": "seized / stopped working",
    "lang": "en",
    "translated": "blades freeze in middle of screen at highest setting, motor replaced"
   },
@@ -926,9 +926,9 @@
    "pred": "wiper_stall",
    "ok": true,
    "component": "windshield wiper",
-   "failure_mode": "stuck",
+   "failure_mode": "stuck / stopped working",
    "lang": "hi",
-   "translated": "The wiper got stuck in heavy rain."
+   "translated": "Wiper got stuck in heavy rain"
   },
   {
    "note": "customer nearly had accident in rain, wiper parked halfway. also needs new floor mats",
@@ -937,9 +937,9 @@
    "pred": "wiper_stall",
    "ok": true,
    "component": "windshield wiper",
-   "failure_mode": "parked halfway",
+   "failure_mode": "parked halfway / stopped mid-wipe",
    "lang": "en",
-   "translated": "Customer nearly had accident in rain, wiper parked halfway. Also needs new floor mats."
+   "translated": "customer nearly had accident in rain, wiper parked halfway. also needs new floor mats"
   },
   {
    "note": "motor wiper diganti, berhenti di tengah",
@@ -948,9 +948,9 @@
    "pred": "wiper_stall",
    "ok": true,
    "component": "wiper motor",
-   "failure_mode": "stopped in the middle",
+   "failure_mode": "stops mid-cycle",
    "lang": "id",
-   "translated": "wiper motor replaced, stopped in the middle"
+   "translated": "wiper motor replaced, stops in the middle"
   },
   {
    "note": "w/s wiper stall hi spd",
@@ -981,7 +981,7 @@
    "pred": "wiper_stall",
    "ok": true,
    "component": "wiper arm",
-   "failure_mode": "halts / stops operation",
+   "failure_mode": "halts on glass",
    "lang": "en",
    "translated": "wiper arm halts on glass at speed 3"
   },
@@ -994,7 +994,7 @@
    "component": "windshield wiper",
    "failure_mode": "stopped working",
    "lang": "hi",
-   "translated": "Wiper stopped working midway through the journey."
+   "translated": "Wiper stopped working midway."
   },
   {
    "note": "humming from back seat at idle",
@@ -1013,10 +1013,10 @@
    "truth": "fuel_pump_whine",
    "pred": "fuel_pump_whine",
    "ok": true,
-   "component": "component under rear seat",
-   "failure_mode": "noise and jerking",
+   "component": "component under the rear seat (likely fuel pump)",
+   "failure_mode": "abnormal zzzz noise and jerking",
    "lang": "hi",
-   "translated": "Zzzz noise from under the rear seat, car jerks."
+   "translated": "zzzz sound from under the rear seat, car jerks"
   },
   {
    "note": "fuel pmp noisy",
@@ -1027,7 +1027,7 @@
    "component": "fuel pump",
    "failure_mode": "noise",
    "lang": "en",
-   "translated": "Fuel pump noisy"
+   "translated": "Fuel pump noisy."
   },
   {
    "note": "bunyi dengung dari tangki bensin, kadang tersendat",
@@ -1036,9 +1036,9 @@
    "pred": "fuel_pump_whine",
    "ok": true,
    "component": "fuel tank",
-   "failure_mode": "humming noise and intermittent hesitation",
+   "failure_mode": "noise and engine hesitation / stuttering",
    "lang": "id",
-   "translated": "Humming noise from the fuel tank, sometimes hesitates/sputters"
+   "translated": "humming sound from fuel tank, sometimes stuttering / hesitating"
   },
   {
    "note": "engine hesitates on pickup and whine from rear, pump module changed",
@@ -1046,10 +1046,10 @@
    "truth": "fuel_pump_whine",
    "pred": "fuel_pump_whine",
    "ok": true,
-   "component": "pump module",
-   "failure_mode": "whine and causing hesitation",
+   "component": "fuel pump module",
+   "failure_mode": "whining noise and degraded fuel delivery",
    "lang": "en",
-   "translated": "Engine hesitates on pickup and whine from rear, pump module changed"
+   "translated": "engine hesitates on pickup and whine from rear, pump module changed"
   },
   {
    "note": "petrol tank side se seeti, pickup kam",
@@ -1057,10 +1057,10 @@
    "truth": "fuel_pump_whine",
    "pred": "fuel_pump_whine",
    "ok": true,
-   "component": "fuel tank",
-   "failure_mode": "whistling noise",
+   "component": "petrol tank",
+   "failure_mode": "whistling noise and low pickup",
    "lang": "hi",
-   "translated": "Whistling sound from the petrol tank side, low pickup"
+   "translated": "whistling sound from the petrol tank side, low pickup"
   },
   {
    "note": "whinning noise rear + hesitaton",
@@ -1069,9 +1069,9 @@
    "pred": "fuel_pump_whine",
    "ok": true,
    "component": "unknown",
-   "failure_mode": "noise and hesitation",
+   "failure_mode": "whining noise and hesitation",
    "lang": "en",
-   "translated": "whining noise rear + hesitation"
+   "translated": "Whining noise rear + hesitation"
   },
   {
    "note": "car jerks while accelerating, buzzing near fuel tank. customer also asked for detailing",
@@ -1080,7 +1080,7 @@
    "pred": "fuel_pump_whine",
    "ok": true,
    "component": "fuel pump",
-   "failure_mode": "buzzing noise and hesitation/erratic delivery",
+   "failure_mode": "buzzing noise and improper fuel delivery causing jerking",
    "lang": "en",
    "translated": "car jerks while accelerating, buzzing near fuel tank. customer also asked for detailing"
   },
@@ -1093,7 +1093,7 @@
    "component": "fuel pump",
    "failure_mode": "noise",
    "lang": "id",
-   "translated": "Fuel pump noisy, replaced"
+   "translated": "fuel pump noisy, replaced"
   },
   {
    "note": "pump whine",
@@ -1102,7 +1102,7 @@
    "pred": "fuel_pump_whine",
    "ok": true,
    "component": "pump",
-   "failure_mode": "whining noise",
+   "failure_mode": "whine",
    "lang": "en",
    "translated": "pump whine"
   },
@@ -1112,8 +1112,8 @@
    "truth": "fuel_pump_whine",
    "pred": "fuel_pump_whine",
    "ok": true,
-   "component": "unknown",
-   "failure_mode": "drone and stumbling",
+   "component": "fuel pump",
+   "failure_mode": "drone noise and engine stumble",
    "lang": "en",
    "translated": "drone from under rear seat when idling, sometimes stumbles"
   }

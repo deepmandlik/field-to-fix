@@ -35,12 +35,14 @@ press-and-hold and lets gloved technicians dictate claims.
 ## How we use Google services
 
 - **Gemini on Vertex AI:** Gemini 3.8 Flash reads multilingual notes, photos and voice (Intake), answers questions
-  with tools (Ask) and checks supplier replies. Gemini 4 Argon ranks root causes against the PFMEA and drafts the 8D.
+  with tools (Ask), drafts the 8D and checks supplier replies. Gemini 4 Argon ranks root causes against the PFMEA.
+  Low thinking settings keep a full investigation under a minute.
   `gemini-embedding-001` powers clustering and live claim linking. Outputs use structured JSON schemas, every citation
   is checked against the input, and numbers come from BigQuery, never from the model.
 - **Google Agent Development Kit (ADK):** the investigation is an ADK `SequentialAgent` (Trace → Hypothesise →
-  Draft 8D), and Ask is an ADK `LlmAgent` with case-scoped Python tools. Each step is a deterministic, tool-backed
-  ADK agent, so we keep full control of what the model may cite.
+  Draft 8D). Each step is a deterministic, tool-backed ADK agent, so we keep full control of what the model may cite.
+- **Vertex AI Agent Engine:** the Ask agent (ADK `LlmAgent`) is deployed on Agent Engine; the agent API sends it the
+  case facts and gets a cited answer in about 5 seconds, with the same agent in-process as a fallback.
 - **Cloud Run:** two services in asia-southeast1 — the Next.js web app and the FastAPI agent API, which runs as one
   service account (no API keys).
 - **Firestore:** the live system of record for cases, every agent step, approvals, the 8D and chat. Web, phone and
@@ -53,9 +55,10 @@ press-and-hold and lets gloved technicians dictate claims.
 
 ## Results on our test dataset (6,400 vehicles, 630+ claims, 3 languages)
 
-- Cited 8D draft in about 90 seconds (live ADK run); a new claim linked to its case in ~6 seconds.
+- Cited 8D draft in under 50 seconds (live ADK run, down from 2.5 minutes); Ask answers in ~5 seconds; a new claim
+  links to its case in seconds.
 - 99/100 on a hand-written hard set of messy notes (typos, Hinglish, slang, two-word notes); the one miss was
   “leak hai neeche” (“there is a leak underneath”). 630/630 on the clean generated notes.
 - 56/56 planted failure claims recalled; both bad supplier batches found; 307 at-risk cars flagged with no claims yet.
 - 4 gaps caught in the supplier’s reply in the recorded run.
-- Estimated cost at pilot scale (10,000 claims a month): about $280 a month, ≈ 2.8¢ per claim, at list prices.
+- Estimated cost at pilot scale (10,000 claims a month): about $340 a month, ≈ 3.4¢ per claim, at list prices.

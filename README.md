@@ -18,8 +18,10 @@ drafts the 8D corrective-action report for the supplier-quality engineer to appr
 
 ## Agents and models
 
-- Gemini 3.8 Flash (Intake, Ask, supplier gap check) and Gemini 4 Argon (root cause, 8D) on Vertex AI, set in
-  `agents/f2f/config.py` (`MODEL_FAST`, `MODEL_REASON`).
+- Gemini 3.8 Flash (Intake, Ask, 8D draft, supplier gap check) and Gemini 4 Argon (root cause) on Vertex AI, with low
+  thinking for speed; set in `agents/f2f/config.py` (`MODEL_FAST`, `MODEL_REASON`, `MODEL_DRAFT`, `THINKING_LEVEL`).
+- The Ask agent runs on Vertex AI Agent Engine (`agents/f2f_engine`, deployed by `scripts/deploy_agent_engine.py`;
+  set `AGENT_ENGINE` to its resource name). Without it, Ask runs the same ADK agent in-process.
 - Orchestration uses the Google Agent Development Kit (`agents/f2f/adk_agents.py`): the investigation is a
   `SequentialAgent` of Trace → Hypothesise → Draft 8D, and Ask is an `LlmAgent` with case tools. If ADK is not
   installed or fails before a step runs, both fall back to the direct Gen AI SDK path. `USE_ADK=0` forces that path.
@@ -33,7 +35,7 @@ Bahasa/English). Run it from `agents/`:
 python -m eval.run_hard_eval
 ```
 
-Latest result: 99/100 with Gemini 3.8 Flash (`agents/eval/hard_results.json`).
+Results with Gemini 3.8 Flash: 99/100 (default thinking) and 100/100 (low thinking, the setting the app uses); see `agents/eval/hard_results.json`.
 
 ## Architecture
 
