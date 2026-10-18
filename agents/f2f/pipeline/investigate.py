@@ -152,7 +152,7 @@ def draft_step(st: dict) -> dict:
     fs.event(case_id, "draft_8d", "Drafting 8D (D2–D5) with citations…", 75, "running")
     draft_ctx = json.dumps({**json.loads(context), "hypotheses": hyps, "stock": stock,
                             "other_models_at_risk": other_models}, default=str)
-    e8 = gemini.structured(settings.model_reason, DRAFT_SYSTEM, [draft_ctx], EightD)
+    e8 = gemini.structured(settings.model_draft, DRAFT_SYSTEM, [draft_ctx], EightD)
     eight_d = {}
     for key, sec in (("D2", e8.D2_problem), ("D3", e8.D3_containment), ("D4", e8.D4_root_cause), ("D5", e8.D5_corrective_action)):
         eight_d[key] = {"text": sec.text, "cites": _clean_cites(sec.cites, allowed), "source": "ai", "edited_by": None}

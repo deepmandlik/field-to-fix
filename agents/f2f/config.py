@@ -11,7 +11,14 @@ class Settings:
     embed_location: str = os.getenv("EMBED_LOCATION", "us-central1")
     model_fast: str = os.getenv("MODEL_FAST", "gemini-3.8-flash")
     model_reason: str = os.getenv("MODEL_REASON", "gemini-4-argon")
+    # The 8D draft is long, structured writing from facts already found: the fast model at low thinking does it in ~15 s.
+    model_draft: str = os.getenv("MODEL_DRAFT", "gemini-3.8-flash")
+    # Default thinking level for every call. LOW keeps answers fast; HIGH thinking took 1-3 minutes per call.
+    thinking_level: str = os.getenv("THINKING_LEVEL", "LOW")
     model_embed: str = os.getenv("MODEL_EMBED", "gemini-embedding-001")
+    # Vertex AI Agent Engine resource running the Ask agent (scripts/deploy_agent_engine.py). Empty = run Ask in-process.
+    agent_engine: str = os.getenv("AGENT_ENGINE", "")
+    agent_engine_timeout: float = float(os.getenv("AGENT_ENGINE_TIMEOUT", "20"))
     embed_dim: int = int(os.getenv("EMBED_DIM", "768"))
     bq_dataset: str = os.getenv("BQ_DATASET", "f2f")
     bq_location: str = os.getenv("BQ_LOCATION", "asia-southeast1")

@@ -62,6 +62,11 @@ def file_part(uri: str) -> types.Part:
     return types.Part.from_uri(file_uri=uri, mime_type=mime)
 
 
+def thinking(level: str | None = None) -> types.ThinkingConfig | None:
+    level = (level or settings.thinking_level or "").upper()
+    return types.ThinkingConfig(thinking_level=level) if level and level != "DEFAULT" else None
+
+
 def structured(model: str, system: str, parts: list, schema: Type[T], temperature: float = 0.2) -> T:
     """One Gemini call that must return JSON matching `schema`."""
     resp = with_retry(
@@ -73,6 +78,7 @@ def structured(model: str, system: str, parts: list, schema: Type[T], temperatur
             temperature=temperature,
             response_mime_type="application/json",
             response_schema=schema,
+            thinking_config=thinking(),
         ),
     )
     if resp.parsed is None:
